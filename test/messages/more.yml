@@ -1,0 +1,12 @@
+en:
+  more: "Oh there's more!"
+
+delimiter_only:
+  numeric:
+    formats:
+      delimiter: 'Just me'
+
+separator_only:
+  numeric:
+    formats:
+      separator: 'Just me'

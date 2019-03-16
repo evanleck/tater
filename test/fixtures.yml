@@ -1,0 +1,87 @@
+en:
+  title: 'This is a title'
+  interpolated: 'This has some %{fancy} text'
+  double: '%{first} %{second}!'
+
+  deep:
+    key: 'This key is deeper'
+
+  date:
+    formats:
+      default: '%Y/%-m/%-d'
+      ohmy: '%-m something %-d oh my %Y'
+
+  time:
+    formats:
+      default: '%Y/%-m/%-d/%H/%M/%S'
+
+  datetime:
+    formats:
+      default: '%Y/%-m/%-d/%H/%M/%S'
+
+  numeric:
+    delimiter: 'TURKEYS'
+    separator: 'NAH'
+
+fr:
+  time:
+    am: 'am'
+    pm: 'pm'
+
+    formats:
+      default: '%I%P'
+      loud: '%I%p'
+
+  date:
+    formats:
+      abbreviated_day: '%a'
+      day: '%A'
+
+      abbreviated_month: '%b'
+      month: '%B'
+
+    days:
+      - dimanche
+      - lundi
+      - mardi
+      - mercredi
+      - jeudi
+      - vendredi
+      - samedi
+
+    abbreviated_days:
+      - dim
+      - lun
+      - mar
+      - mer
+      - jeu
+      - ven
+      - sam
+
+    months:
+      - janvier
+      - février
+      - mars
+      - avril
+      - mai
+      - juin
+      - juillet
+      - août
+      - septembre
+      - octobre
+      - novembre
+      - décembre
+
+    abbreviated_months:
+      - jan.
+      - fév.
+      - mar.
+      - avr.
+      - mai
+      - juin
+      - juil.
+      - août
+      - sept.
+      - oct.
+      - nov.
+      - déc.

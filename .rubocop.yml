@@ -1,0 +1,59 @@
+# http://rubocop.readthedocs.io
+# https://github.com/bbatsov/rubocop/blob/master/config/enabled.yml
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  ExtraDetails: true
+  TargetRubyVersion: 2.6
+
+
+Performance:
+  enabled: true
+
+Layout/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/EmptyLineAfterMagicComment:
+  Enabled: false
+
+Layout/IndentHash:
+  EnforcedStyle: consistent
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Layout/SpaceInsideStringInterpolation:
+  EnforcedStyle: space
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/Next:
+  MinBodyLength: 8
