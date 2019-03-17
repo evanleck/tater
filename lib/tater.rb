@@ -178,8 +178,8 @@ class Tater
         when '%^b' then lookup('date.abbreviated_months', locale_override)[object.mon - 1].upcase
         when '%B'  then lookup('date.months', locale_override)[object.mon - 1]
         when '%^B' then lookup('date.months', locale_override)[object.mon - 1].upcase
-        when '%p'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale_override).upcase if object.respond_to?(:hour) # rubocop:disable Metric/BlockNesting
-        when '%P'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale_override).downcase if object.respond_to?(:hour) # rubocop:disable Metric/BlockNesting
+        when '%p'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale_override).upcase if object.respond_to?(:hour) # rubocop:disable Metrics/BlockNesting
+        when '%P'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale_override).downcase if object.respond_to?(:hour) # rubocop:disable Metrics/BlockNesting
         end
       end
 

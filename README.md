@@ -14,7 +14,8 @@ interpolation. That's probably 90% of what Tater does.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Tater requires Ruby 2.5 or higher. To install Tater, add this line to your
+application's Gemfile (or gems.rb):
 
 ```ruby
 gem 'tater'
@@ -36,6 +37,8 @@ gem install tater
 ## Usage
 
 ```ruby
+require 'tater'
+
 messages = {
   'some' => {
     'key' => 'This here string!'
