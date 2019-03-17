@@ -1,4 +1,7 @@
-# Tater the Translator
+# Tater 
+
+[![Gem Version](https://badge.fury.io/rb/tater.svg)](https://badge.fury.io/rb/tater)
+[![Build Status](https://secure.travis-ci.org/evanleck/tater.svg)](https://travis-ci.org/evanleck/tater)
 
 Tater is an internationalization (i18n) and localization (l10n) library designed
 for simplicity. It doesn't do everything that other libraries do, but that's by
