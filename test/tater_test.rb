@@ -92,7 +92,7 @@ describe Tater do
     end
 
     it 'returns an array with the available locales (i.e. the top-level keys in our messages hash)' do
-      assert_equal %w[en delimiter_only separator_only fr], i18n.available
+      assert_equal %w[en delimiter_only separator_only fr].sort, i18n.available.sort
     end
   end
 
