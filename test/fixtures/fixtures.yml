@@ -1,4 +1,6 @@
 en:
+  english: 'Found in English'
+
   title: 'This is a title'
   interpolated: 'This has some %{fancy} text'
   double: '%{first} %{second}!'
@@ -23,7 +25,15 @@ en:
     delimiter: 'TURKEYS'
     separator: 'NAH'
 
+  cascade:
+    tacos: 'Delicious'
+
+    another:
+      crazy: 'Whoaa'
+
 fr:
+  french: 'Found in French'
+
   time:
     am: 'am'
     pm: 'pm'

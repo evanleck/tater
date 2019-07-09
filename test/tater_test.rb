@@ -49,7 +49,7 @@ describe Tater do
 
   describe '#available?' do
     let :i18n do
-      Tater.new(path: File.expand_path('test'))
+      Tater.new(path: File.expand_path('test/fixtures'))
     end
 
     it 'tells you if the locale is available' do
@@ -60,14 +60,14 @@ describe Tater do
 
   describe '#load' do
     it 'loads from a path on initialization' do
-      i18n = Tater.new(path: File.expand_path('test'))
+      i18n = Tater.new(path: File.expand_path('test/fixtures'))
 
       assert_instance_of(Hash, i18n.messages)
     end
 
     it 'loads from a path after initialization' do
       i18n = Tater.new
-      i18n.load(path: File.expand_path('test'))
+      i18n.load(path: File.expand_path('test/fixtures'))
 
       assert_instance_of(Hash, i18n.messages)
     end
@@ -88,7 +88,7 @@ describe Tater do
 
   describe '#available' do
     let :i18n do
-      Tater.new(path: File.expand_path('test'))
+      Tater.new(path: File.expand_path('test/fixtures'))
     end
 
     it 'returns an array with the available locales (i.e. the top-level keys in our messages hash)' do
@@ -98,7 +98,7 @@ describe Tater do
 
   describe '#lookup' do
     let :i18n do
-      Tater.new(path: File.expand_path('test'))
+      Tater.new(path: File.expand_path('test/fixtures'))
     end
 
     it 'returns keys from messages' do
@@ -112,11 +112,17 @@ describe Tater do
     it 'returns nil for missing lookups' do
       assert_nil i18n.lookup('nope')
     end
+
+    it 'cascades' do
+      assert_equal 'Delicious', i18n.lookup('cascade.nope.tacos', nil, true)
+      assert_equal 'Whoaa', i18n.lookup('cascade.another.nope.crazy', nil, true)
+      assert_nil i18n.lookup('cascade.nahhhhhh')
+    end
   end
 
   describe '#translate' do
     let :i18n do
-      Tater.new(path: File.expand_path('test'))
+      Tater.new(path: File.expand_path('test/fixtures'))
     end
 
     it 'translates strings' do
@@ -148,11 +154,32 @@ describe Tater do
     it 'is aliased as t' do
       assert_equal 'This is a title', i18n.t('title')
     end
+
+    it 'cascades lookups' do
+      assert_equal 'Tater lookup failed: en.cascade.nope.tacos', i18n.translate('cascade.nope.tacos')
+      assert_equal 'Delicious', i18n.translate('cascade.nope.tacos', cascade: true)
+    end
+
+    it 'defaults lookups' do
+      assert_equal 'Tater lookup failed: en.default.missing', i18n.translate('default.missing')
+      assert_equal 'Nope', i18n.translate('default.missing', default: 'Nope')
+    end
+
+    it 'does lookups across different locales' do
+      assert_equal 'Found in French', i18n.translate('french', locales: %w[fr en])
+      assert_equal 'Found in English', i18n.translate('english', locales: %w[fr en])
+      assert_equal 'Tater lookup failed: ["fr", "en"].neither', i18n.translate('neither', locales: %w[fr en])
+    end
+
+    it 'finds Ruby files as well' do
+      assert_equal 'Hey ruby!', i18n.translate('ruby')
+      assert_equal 'Hey options!', i18n.translate('options', options: 'options')
+    end
   end
 
   describe '#localize' do
     let :i18n do
-      Tater.new(path: File.expand_path('test'))
+      Tater.new(path: File.expand_path('test/fixtures'))
     end
 
     it 'localizes Dates' do
@@ -177,6 +204,11 @@ describe Tater do
 
     it 'localizes BigDecimals' do
       assert_equal '1NAH12', i18n.localize(BigDecimal('1.12'))
+    end
+
+    it 'allows overriding the delimiter and separator' do
+      assert_equal '10WOO000NAH12', i18n.localize(10_000.12, delimiter: 'WOO')
+      assert_equal '10TURKEYS000YA12', i18n.localize(10_000.12, separator: 'YA')
     end
 
     it 'accepts other formats' do
@@ -205,7 +237,7 @@ describe Tater do
 
     describe 'month, day, and AM/PM names' do
       let :i18n do
-        Tater.new(path: File.expand_path('test'), locale: 'fr')
+        Tater.new(path: File.expand_path('test/fixtures'), locale: 'fr')
       end
 
       it 'localizes day names' do
@@ -269,7 +301,7 @@ describe Tater do
 
   describe '#locale=' do
     let :i18n do
-      Tater.new(path: File.expand_path('test'))
+      Tater.new(path: File.expand_path('test/fixtures'))
     end
 
     it 'overrides the locale when available' do
@@ -280,6 +312,24 @@ describe Tater do
     it 'does not override the locale when not available' do
       i18n.locale = 'nopeskies'
       assert_equal 'en', i18n.locale
+    end
+  end
+
+  describe '#cascades?' do
+    let :default do
+      Tater.new
+    end
+
+    let :cascade do
+      Tater.new(cascade: true)
+    end
+
+    it 'returns false by default' do
+      refute default.cascades?
+    end
+
+    it 'returns true when passed during initialization' do
+      assert cascade.cascades?
     end
   end
 end

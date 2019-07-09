@@ -82,12 +82,18 @@ class Tater
   # @return [Hash]
   attr_reader :messages
 
-  def initialize(path: nil, messages: nil, locale: DEFAULT_LOCALE)
+  def initialize(path: nil, messages: nil, locale: DEFAULT_LOCALE, cascade: false)
+    @cascade = cascade
     @locale = locale
     @messages = {}
 
     load(path: path) if path
     load(messages: messages) if messages
+  end
+
+  # @return [Boolean]
+  def cascades?
+    @cascade
   end
 
   # An array of the available locale codes.
@@ -114,7 +120,11 @@ class Tater
   def load(path: nil, messages: nil)
     if path
       Dir.glob(File.join(path, '**', '*.{yml,yaml}')).each do |file|
-        Utils.deep_merge!(@messages, YAML.safe_load(File.read(file)))
+        Utils.deep_merge!(@messages, YAML.load_file(file))
+      end
+
+      Dir.glob(File.join(path, '**', '*.rb')).each do |file|
+        Utils.deep_merge!(@messages, Utils.deep_stringify_keys!(eval(IO.read(file), binding, file)))
       end
     end
 
@@ -144,8 +154,8 @@ class Tater
     when String
       object
     when Numeric
-      delimiter = lookup('numeric.delimiter', locale_override)
-      separator = lookup('numeric.separator', locale_override)
+      delimiter = options.delete(:delimiter) || lookup('numeric.delimiter', locale_override)
+      separator = options.delete(:separator) || lookup('numeric.separator', locale_override)
       precision = options.fetch(:precision) { 2 }
 
       raise(MissingLocalizationFormat, "Numeric localization delimiter ('numeric.delimiter') missing") unless delimiter
@@ -198,10 +208,22 @@ class Tater
   #
   # @return
   #   Basically anything that can be stored in YAML, including nil.
-  def lookup(key, locale_override = nil)
+  def lookup(key, locale_override = nil, cascade_override = nil)
     path = key.split(SEPARATOR).prepend(locale_override || locale).map(&:to_s)
 
-    @messages.dig(*path)
+    if cascade_override.nil? ? @cascade : cascade_override
+      while path.length >= 2 do
+        attempt = @messages.dig(*path)
+
+        if attempt
+          break attempt
+        else
+          path.delete_at(path.length - 2)
+        end
+      end
+    else
+      @messages.dig(*path)
+    end
   end
 
   # Translate a key path and optional interpolation arguments into a string.
@@ -212,14 +234,36 @@ class Tater
   #
   # @param key [String]
   #   The period-separated key path to look within our messages for.
+  # @option options [Boolean] :cascade
+  # @option options [String] :default
+  # @option options [String] :locale
   #
   # @return [String]
   #   The translated and interpreted string, if found, or any data at the
   #   defined key.
   def translate(key, options = {})
+    cascade_override = options.delete(:cascade)
+    default = options.delete(:default)
     locale_override = options.delete(:locale)
+    locales = options.delete(:locales)
 
-    Utils.interpolate(lookup(key, locale_override), options) || "Tater lookup failed: #{ locale_override || locale }.#{ key }"
+    message =
+      if locale_override || !locales
+        lookup(key, locale_override, cascade_override)
+      elsif locales
+        locales.find do |accept|
+          found = lookup(key, accept, cascade_override)
+
+          break found if found
+        end
+      end
+
+    # Call procs that should return a string.
+    if message.is_a?(Proc)
+      message = message.call(key, options)
+    end
+
+    Utils.interpolate(message, options) || default || "Tater lookup failed: #{ locale_override || locales || locale }.#{ key }"
   end
   alias t translate
 end

@@ -59,7 +59,7 @@ i18n.translate('interpolated', you: 'world') # => 'Hello world!'
 ## Numeric Localization
 
 Numeric localization (`Numeric`, `Integer`, `Float`, and `BigDecimal`) require
-filling in a separater and delimiter. For example:
+filling in a separator and delimiter. For example:
 
 ```yaml
 en:
@@ -72,6 +72,12 @@ With that, you can do things like this:
 
 ```ruby
 i18n.localize(1000.2) # => "1,000.20"
+```
+
+The separator and delimiter can also be passed in per-call:
+
+```ruby
+i18n.localize(1000.2, delimiter: '_', separator: '+') # => "1_000+20"
 ```
 
 
@@ -158,6 +164,98 @@ i18n.localize(Date.new(1970, 1, 1), format: '%A') # => 'jeudi'
 # Or, using a key defined in "formats":
 i18n.localize(Date.new(1970, 1, 1), format: 'day') # => 'jeudi'
 ```
+
+
+## Cascading Lookups
+
+Lookups can be cascaded, i.e. pieces of the scope of the can be lopped off
+incrementally.
+
+```ruby
+messages = {
+  'login' => {
+    'title' => 'Login',
+    'description' => 'Normal description.'
+
+    'special' => {
+      'title' => 'Special Login'
+    }
+  }
+}
+
+i18n = Tater.new(messages: messages)
+i18n.translate('login.special.title') # => 'Special Login'
+i18n.translate('login.special.description') # => 'Tater lookup failed'
+
+i18n.translate('login.special.description', cascade: true) # => 'Normal description.'
+```
+
+With cascade, the final key stays the same, but pieces of the scope get lopped
+off. In this case, lookups will be tried in this order:
+
+1. `'login.special.description'`
+2. `'login.description'`
+
+This can be useful when you want to override some messages but don't want to
+have to copy all of the other, non-overwritten messages.
+
+Cascading can also be enabled by default when initializing an instance of Tater.
+
+```ruby
+Tater.new(cascade: true)
+```
+
+Cascading is off by default.
+
+
+## Defaults
+
+If you'd like to default to another value in case of a missed lookup, you can
+provide the `:default` option to `#translate`.
+
+```ruby
+Tater.new.translate('nope', default: 'Yep!') # => 'Yep!'
+```
+
+
+## Procs and Messages in Ruby
+
+Ruby files can be used to store messages in addition to YAML, so long as the
+Ruby file returns a `Hash` when evalled.
+
+```ruby
+{
+  en: {
+    ruby: proc do |key, options = {}|
+      "Hey #{ key }!"
+    end
+  }
+}
+```
+
+
+## Multiple Locales
+
+If you like to check multiple locales and pull the first matching one out, you
+can pass the `:locales` option an array of top-level locale keys.
+
+```ruby
+messages = {
+  'en' => {
+    'title' => 'Login',
+    'description' => 'English description.'
+  },
+  'fr' => {
+    'title' => 'la connexion'
+  }
+}
+
+i18n = Tater.new(messages: messages)
+i18n.translate('title', locales: %w[fr en]) # => 'la connexion'
+i18n.translate('description', locales: %w[fr en]) # => 'English description.'
+```
+
+Locales will tried in order and which one matches first will be returned.
 
 
 ## Limitations
