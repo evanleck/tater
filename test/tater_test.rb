@@ -116,6 +116,7 @@ describe Tater do
     it 'cascades' do
       assert_equal 'Delicious', i18n.lookup('cascade.nope.tacos', nil, true)
       assert_equal 'Whoaa', i18n.lookup('cascade.another.nope.crazy', nil, true)
+      assert_nil i18n.lookup('cascade.another.nope.crazy', nil, false)
       assert_nil i18n.lookup('cascade.nahhhhhh')
     end
   end
@@ -156,6 +157,7 @@ describe Tater do
     end
 
     it 'cascades lookups' do
+      assert_equal 'Tater lookup failed: en.cascade.another.nope.crazy', i18n.translate('cascade.another.nope.crazy', cascade: false)
       assert_equal 'Tater lookup failed: en.cascade.nope.tacos', i18n.translate('cascade.nope.tacos')
       assert_equal 'Delicious', i18n.translate('cascade.nope.tacos', cascade: true)
     end

@@ -1,5 +1,9 @@
 # Tater Changelog
 
+## 1.1.1
+
+- Add a few more tests and improve documentation.
+
 
 ## 1.1.0
 

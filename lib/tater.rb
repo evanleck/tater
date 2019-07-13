@@ -91,6 +91,8 @@ class Tater
     load(messages: messages) if messages
   end
 
+  # Do lookups cascade by default?
+  #
   # @return [Boolean]
   def cascades?
     @cascade
@@ -114,7 +116,7 @@ class Tater
   # files or a collection of messages.
   #
   # @param path [String]
-  #   A path to search for YAML files to load messages from.
+  #   A path to search for YAML or Ruby files to load messages from.
   # @param messages [Hash]
   #   A hash of messages ready to be loaded in.
   def load(path: nil, messages: nil)
@@ -143,6 +145,17 @@ class Tater
   #
   # @param object [Date, Time, DateTime, Numeric]
   #   The object to localize.
+  # @param options [Hash]
+  #   Options to configure localization.
+  #
+  # @option options [String] :format
+  #   The key or format string to use for localizing the current object.
+  # @option options [String] :locale
+  #   The locale to use in lieu of the current default.
+  # @option options [String] :delimiter
+  #   The delimiter to use when localizing numberic values.
+  # @option options [String] :separator
+  #   The separator to use when localizing numberic values.
   #
   # @return [String]
   #   A localized version of the object passed in.
@@ -156,10 +169,10 @@ class Tater
     when Numeric
       delimiter = options.delete(:delimiter) || lookup('numeric.delimiter', locale_override)
       separator = options.delete(:separator) || lookup('numeric.separator', locale_override)
-      precision = options.fetch(:precision) { 2 }
+      precision = options.delete(:precision) || 2
 
-      raise(MissingLocalizationFormat, "Numeric localization delimiter ('numeric.delimiter') missing") unless delimiter
-      raise(MissingLocalizationFormat, "Numeric localization separator ('numeric.separator') missing") unless separator
+      raise(MissingLocalizationFormat, "Numeric localization delimiter ('numeric.delimiter') missing or not passed as option :delimiter") unless delimiter
+      raise(MissingLocalizationFormat, "Numeric localization separator ('numeric.separator') missing or not passed as option :separator") unless separator
 
       # Heavily cribbed from Rails.
       integer, fraction = Utils.string_from_numeric(object).split('.')
@@ -205,6 +218,8 @@ class Tater
   # @param key [String]
   # @param locale_override [String]
   #   A locale to use instead of our current one.
+  # @param cascade_override [Boolean]
+  #   A boolean to forcibly set the cascade option for this lookup.
   #
   # @return
   #   Basically anything that can be stored in YAML, including nil.
@@ -234,23 +249,31 @@ class Tater
   #
   # @param key [String]
   #   The period-separated key path to look within our messages for.
+  # @param options [Hash]
+  #   Options, including values to interpolate to any found string.
+  #
   # @option options [Boolean] :cascade
+  #   Should this lookup cascade or not? Can override @cascade.
   # @option options [String] :default
+  #   A default string to return, should lookup fail.
   # @option options [String] :locale
+  #   A specific locale to lookup within. This will take precedence over the
+  #   :locales option.
+  # @option options [Array<String>] :locales
+  #   An array of locales to look within.
   #
   # @return [String]
   #   The translated and interpreted string, if found, or any data at the
   #   defined key.
   def translate(key, options = {})
     cascade_override = options.delete(:cascade)
-    default = options.delete(:default)
     locale_override = options.delete(:locale)
     locales = options.delete(:locales)
 
     message =
       if locale_override || !locales
         lookup(key, locale_override, cascade_override)
-      elsif locales
+      else
         locales.find do |accept|
           found = lookup(key, accept, cascade_override)
 
@@ -263,7 +286,7 @@ class Tater
       message = message.call(key, options)
     end
 
-    Utils.interpolate(message, options) || default || "Tater lookup failed: #{ locale_override || locales || locale }.#{ key }"
+    Utils.interpolate(message, options) || options.delete(:default) { "Tater lookup failed: #{ locale_override || locales || locale }.#{ key }" }
   end
   alias t translate
 end
