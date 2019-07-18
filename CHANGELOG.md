@@ -1,5 +1,10 @@
 # Tater Changelog
 
+## 1.2.0
+
+- Add a new `#includes?` method.
+
+
 ## 1.1.1
 
 - Add a few more tests and improve documentation.

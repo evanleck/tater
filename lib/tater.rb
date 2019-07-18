@@ -241,6 +241,41 @@ class Tater
     end
   end
 
+  # Check that there's a key at the given path.
+  #
+  # @param key [String]
+  #   The period-separated key path to look within our messages for.
+  # @param options [Hash]
+  #   Options to pass to the #lookup method, including locale overrides.
+  #
+  # @option options [Boolean] :cascade
+  #   Should this lookup cascade or not? Can override @cascade.
+  # @option options [String] :locale
+  #   A specific locale to lookup within. This will take precedence over the
+  #   :locales option.
+  # @option options [Array<String>] :locales
+  #   An array of locales to look within.
+  #
+  # @return [Boolean]
+  def includes?(key, options = {})
+    cascade_override = options.delete(:cascade)
+    locale_override = options.delete(:locale)
+    locales = options.delete(:locales)
+
+    message =
+      if locale_override || !locales
+        lookup(key, locale_override, cascade_override)
+      else
+        locales.find do |accept|
+          found = lookup(key, accept, cascade_override)
+
+          break found if found
+        end
+      end
+
+    !message.nil?
+  end
+
   # Translate a key path and optional interpolation arguments into a string.
   # It's effectively a combination of #lookup and #interpolate.
   #

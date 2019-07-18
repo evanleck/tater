@@ -334,4 +334,29 @@ describe Tater do
       assert cascade.cascades?
     end
   end
+
+  describe '#includes?' do
+    let :i18n do
+      Tater.new(path: File.expand_path('test/fixtures'))
+    end
+
+    it 'tells you if you have a translation' do
+      assert i18n.includes?('deep')
+      assert i18n.includes?('deep.key')
+      refute i18n.includes?('deep.nope')
+      refute i18n.includes?('nope')
+    end
+
+    it 'allows overriding the locale' do
+      assert i18n.includes?('french', locale: 'fr')
+      assert i18n.includes?('french', locales: %w[en fr])
+      refute i18n.includes?('french', locales: %w[en])
+      refute i18n.includes?('french')
+    end
+
+    it 'allows cascading' do
+      assert i18n.includes?('cascade.nope.tacos', cascade: true)
+      refute i18n.includes?('cascade.nope.tacos', cascade: false)
+    end
+  end
 end
