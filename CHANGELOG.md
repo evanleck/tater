@@ -1,5 +1,10 @@
 # Tater Changelog
 
+## 1.3.0
+
+- Add support for localizing arrays.
+
+
 ## 1.2.0
 
 - Add a new `#includes?` method.

@@ -141,7 +141,7 @@ class Tater
     @locale = locale.to_s if available?(locale)
   end
 
-  # Localize a Date, Time, DateTime, or Numeric object.
+  # Localize an Array, Date, Time, DateTime, or Numeric object.
   #
   # @param object [Date, Time, DateTime, Numeric]
   #   The object to localize.
@@ -156,6 +156,13 @@ class Tater
   #   The delimiter to use when localizing numberic values.
   # @option options [String] :separator
   #   The separator to use when localizing numberic values.
+  # @option options [String] :two_words_connector
+  #   The string used to join two array elements together e.g. " and ".
+  # @option options [String] :words_connector
+  #   The string used to connect multiple array elements e.g. ", ".
+  # @option options [String] :last_word_connector
+  #   The string used to connect the final element with preceding array elements
+  #   e.g. ", and ".
   #
   # @return [String]
   #   A localized version of the object passed in.
@@ -207,6 +214,27 @@ class Tater
       end
 
       object.strftime(format)
+    when Array
+      case object.length
+      when 0
+        ''
+      when 1
+        object[0]
+      when 2
+        two_words_connector = options.delete(:two_words_connector) || lookup('array.two_words_connector', locale_override)
+
+        raise(MissingLocalizationFormat, "Sentence localization connector ('array.two_words_connector') missing or not passed as option :two_words_connector") unless two_words_connector
+
+        "#{ object[0] }#{ two_words_connector }#{ object[1] }"
+      else
+        last_word_connector = options.delete(:last_word_connector) || lookup('array.last_word_connector', locale_override)
+        words_connector = options.delete(:words_connector) || lookup('array.words_connector', locale_override)
+
+        raise(MissingLocalizationFormat, "Sentence localization connector ('array.last_word_connector') missing or not passed as option :last_word_connector") unless last_word_connector
+        raise(MissingLocalizationFormat, "Sentence localization connector ('array.words_connector') missing or not passed as option :words_connector") unless words_connector
+
+        "#{ object[0...-1].join(words_connector) }#{ last_word_connector }#{ object[-1] }"
+      end
     else
       raise(UnLocalizableObject, "The object class #{ object.class } cannot be localized by Tater.")
     end

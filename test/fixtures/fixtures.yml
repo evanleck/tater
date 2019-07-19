@@ -8,6 +8,11 @@ en:
   deep:
     key: 'This key is deeper'
 
+  array:
+    last_word_connector: ", and "
+    two_words_connector: " and "
+    words_connector: ", "
+
   date:
     formats:
       default: '%Y/%-m/%-d'

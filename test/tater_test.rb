@@ -184,6 +184,35 @@ describe Tater do
       Tater.new(path: File.expand_path('test/fixtures'))
     end
 
+    let :fr do
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'fr')
+    end
+
+    it 'localizes arrays' do
+      assert_equal 'tacos and burritos', i18n.localize(%w[tacos burritos])
+      assert_equal 'tacos', i18n.localize(%w[tacos])
+      assert_equal 'tacos, enchiladas, and burritos', i18n.localize(%w[tacos enchiladas burritos])
+
+      assert_equal 'tacos + enchiladas ++ burritos', fr.localize(%w[tacos enchiladas burritos], words_connector: ' + ', last_word_connector: ' ++ ')
+      assert_equal 'tacostwoburritos', fr.localize(%w[tacos burritos], two_words_connector: 'two')
+
+      assert_raises(Tater::MissingLocalizationFormat) do
+        fr.localize(%w[tacos burritos])
+      end
+
+      assert_raises(Tater::MissingLocalizationFormat) do
+        fr.localize(%w[tacos burritos], last_word_connector: 'last', words_connector: 'words')
+      end
+
+      assert_raises(Tater::MissingLocalizationFormat) do
+        fr.localize(%w[tacos burritos], last_word_connector: 'last')
+      end
+
+      assert_raises(Tater::MissingLocalizationFormat) do
+        fr.localize(%w[tacos burritos], words_connector: 'words')
+      end
+    end
+
     it 'localizes Dates' do
       assert_equal '1970/1/1', i18n.localize(Date.new(1970, 1, 1))
     end

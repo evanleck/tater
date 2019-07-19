@@ -56,6 +56,25 @@ i18n.translate('some.key') # => 'This here string!'
 i18n.translate('interpolated', you: 'world') # => 'Hello world!'
 ```
 
+
+## Array Localization
+
+Given an array, Tater will do it's best to join the elements of the array into a
+sentence based on how many elements there are.
+
+```yaml
+en:
+  array:
+    last_word_connector: ", and "
+    two_words_connector: " and "
+    words_connector: ", "
+```
+
+```ruby
+i18n.localize(%w[tacos enchiladas burritos]) # => "tacos, enchiladas, and burritos"
+```
+
+
 ## Numeric Localization
 
 Numeric localization (`Numeric`, `Integer`, `Float`, and `BigDecimal`) require
