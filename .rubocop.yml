@@ -16,7 +16,7 @@ Layout/AlignParameters:
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
-Layout/IndentHash:
+Layout/IndentFirstHashElement:
   EnforcedStyle: consistent
 
 Layout/MultilineOperationIndentation:
