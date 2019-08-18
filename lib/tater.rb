@@ -126,7 +126,7 @@ class Tater
       end
 
       Dir.glob(File.join(path, '**', '*.rb')).each do |file|
-        Utils.deep_merge!(@messages, Utils.deep_stringify_keys!(eval(IO.read(file), binding, file)))
+        Utils.deep_merge!(@messages, Utils.deep_stringify_keys!(eval(IO.read(file), binding, file))) # rubocop:disable Security/Eval
       end
     end
 
@@ -255,14 +255,12 @@ class Tater
     path = key.split(SEPARATOR).prepend(locale_override || locale).map(&:to_s)
 
     if cascade_override.nil? ? @cascade : cascade_override
-      while path.length >= 2 do
+      while path.length >= 2
         attempt = @messages.dig(*path)
 
-        if attempt
-          break attempt
-        else
-          path.delete_at(path.length - 2)
-        end
+        break attempt if attempt
+
+        path.delete_at(path.length - 2)
       end
     else
       @messages.dig(*path)
