@@ -1,5 +1,8 @@
 # http://rubocop.readthedocs.io
 # https://github.com/bbatsov/rubocop/blob/master/config/enabled.yml
+require:
+  - rubocop-performance
+
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
@@ -7,16 +10,13 @@ AllCops:
   TargetRubyVersion: 2.5
 
 
-Performance:
-  enabled: true
-
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   EnforcedStyle: with_fixed_indentation
 
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
-Layout/IndentFirstHashElement:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
 Layout/MultilineOperationIndentation:
@@ -37,7 +37,7 @@ Metrics/ClassLength:
 Metrics/CyclomaticComplexity:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/MethodLength:
@@ -57,3 +57,12 @@ Style/IfUnlessModifier:
 
 Style/Next:
   MinBodyLength: 8
+
+Style/HashEachMethods:
+  Enabled: true
+
+Style/HashTransformKeys:
+  Enabled: true
+
+Style/HashTransformValues:
+  Enabled: true
