@@ -51,6 +51,7 @@ class Tater
     # @return [String]
     def self.interpolate(string, options = {})
       return string unless string.is_a?(String)
+      return string if options.empty?
 
       format(string, options)
     end

@@ -31,10 +31,14 @@ describe Tater do
         assert_equal 'this thing', Tater::Utils.interpolate('this %{what}', what: 'thing')
       end
 
-      it 'raises a KeyError when an argument is missing' do
+      it 'raises a KeyError when an argument is missing (but options are passed)' do
         assert_raises(KeyError) do
-          Tater::Utils.interpolate('this %{what}')
+          Tater::Utils.interpolate('this %{what}', nope: 'thing')
         end
+      end
+
+      it 'returns the string unchanged when options are empty (does not raise a KeyError)' do
+        assert_equal 'this %{what}', Tater::Utils.interpolate('this %{what}')
       end
     end
 
