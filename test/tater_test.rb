@@ -5,24 +5,34 @@ require 'date'
 
 describe Tater do
   describe Tater::Utils do
-    describe '#deep_merge!' do
-      it 'deeply merges two hashes, modifying the first' do
+    describe '#deep_merge' do
+      it 'deeply merges two hashes, returning a new one' do
         first = { 'one' => 'one', 'two' => { 'three' => 'three' } }
         second = { 'two' => { 'four' => 'four' } }
 
-        Tater::Utils.deep_merge!(first, second)
+        third = Tater::Utils.deep_merge(first, second)
 
-        assert_equal({ 'one' => 'one', 'two' => { 'three' => 'three', 'four' => 'four' } }, first)
+        assert_equal({ 'one' => 'one', 'two' => { 'three' => 'three', 'four' => 'four' } }, third)
       end
     end
 
-    describe '#deep_stringify_keys!' do
-      it 'converts all keys into strings, recursively modifying the hash passed in' do
+    describe '#deep_stringify_keys' do
+      it 'converts all keys into strings, recursively' do
         start = { en: { login: { title: 'Hello!' } } }
+        finish = Tater::Utils.deep_stringify_keys(start)
 
-        Tater::Utils.deep_stringify_keys!(start)
+        assert_equal({ 'en' => { 'login' => { 'title' => 'Hello!' } } }, finish)
+      end
+    end
 
-        assert_equal({ 'en' => { 'login' => { 'title' => 'Hello!' } } }, start)
+    describe '#deep_freeze' do
+      it 'freezes the keys and values, recursively' do
+        start = Tater::Utils.deep_stringify_keys({ en: { login: { title: 'Hello!' } } })
+        finish = Tater::Utils.deep_freeze(start)
+
+        assert finish.frozen?
+        assert finish.keys.all?(&:frozen?)
+        assert finish.values.all?(&:frozen?)
       end
     end
 
@@ -46,14 +56,14 @@ describe Tater do
       it 'converts numerics to decimal-ish strings' do
         assert_equal '1', Tater::Utils.string_from_numeric(1)
         assert_equal '1.0', Tater::Utils.string_from_numeric(1.0)
-        assert_equal '1.0', Tater::Utils.string_from_numeric(BigDecimal(1))
+        assert_equal '1.0', Tater::Utils.string_from_numeric(BigDecimal('1'))
       end
     end
   end
 
   describe '#available?' do
     let :i18n do
-      Tater.new(path: File.expand_path('test/fixtures'))
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
     end
 
     it 'tells you if the locale is available' do
@@ -88,6 +98,14 @@ describe Tater do
 
       assert_instance_of(Hash, i18n.messages)
     end
+
+    it 'freezes messages after loading' do
+      i18n = Tater.new(messages: { 'hey' => 'Oh hi' })
+
+      assert i18n.messages.frozen?
+      assert i18n.messages.keys.all?(&:frozen?)
+      assert i18n.messages.values.all?(&:frozen?)
+    end
   end
 
   describe '#available' do
@@ -98,11 +116,17 @@ describe Tater do
     it 'returns an array with the available locales (i.e. the top-level keys in our messages hash)' do
       assert_equal %w[en delimiter_only separator_only fr].sort, i18n.available.sort
     end
+
+    it 'updates the available list when new messages are loaded' do
+      i18n.load(messages: { 'added' => { 'hey' => 'yeah' }})
+
+      assert_equal %w[en delimiter_only separator_only fr added].sort, i18n.available.sort
+    end
   end
 
   describe '#lookup' do
     let :i18n do
-      Tater.new(path: File.expand_path('test/fixtures'))
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
     end
 
     it 'returns keys from messages' do
@@ -118,16 +142,16 @@ describe Tater do
     end
 
     it 'cascades' do
-      assert_equal 'Delicious', i18n.lookup('cascade.nope.tacos', nil, true)
-      assert_equal 'Whoaa', i18n.lookup('cascade.another.nope.crazy', nil, true)
-      assert_nil i18n.lookup('cascade.another.nope.crazy', nil, false)
+      assert_equal 'Delicious', i18n.lookup('cascade.nope.tacos', cascade: true)
+      assert_equal 'Whoaa', i18n.lookup('cascade.another.nope.crazy', cascade: true)
+      assert_nil i18n.lookup('cascade.another.nope.crazy', cascade: false)
       assert_nil i18n.lookup('cascade.nahhhhhh')
     end
   end
 
   describe '#translate' do
     let :i18n do
-      Tater.new(path: File.expand_path('test/fixtures'))
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
     end
 
     it 'translates strings' do
@@ -185,7 +209,7 @@ describe Tater do
 
   describe '#localize' do
     let :i18n do
-      Tater.new(path: File.expand_path('test/fixtures'))
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
     end
 
     let :fr do
@@ -336,7 +360,7 @@ describe Tater do
 
   describe '#locale=' do
     let :i18n do
-      Tater.new(path: File.expand_path('test/fixtures'))
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
     end
 
     it 'overrides the locale when available' do
@@ -370,7 +394,7 @@ describe Tater do
 
   describe '#includes?' do
     let :i18n do
-      Tater.new(path: File.expand_path('test/fixtures'))
+      Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
     end
 
     it 'tells you if you have a translation' do

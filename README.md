@@ -27,7 +27,7 @@ And then execute:
 bundle
 ```
 
-Or install it yourself as:
+Or install it yourself by running:
 
 ```sh
 gem install tater
@@ -40,14 +40,19 @@ gem install tater
 require 'tater'
 
 messages = {
-  'some' => {
-    'key' => 'This here string!'
-  },
-  'interpolated' => 'Hello %{you}!'
+  'en' => {
+    'some' => {
+      'key' => 'This here string!'
+    },
+    'interpolated' => 'Hello %{you}!'
+  }
 }
 
-i18n = Tater.new
+i18n = Tater.new(locale: 'en')
 i18n.load(messages: messages)
+
+# OR
+i18n = Tater.new(locale: 'en', messages: messages)
 
 # Basic lookup:
 i18n.translate('some.key') # => 'This here string!'
@@ -57,7 +62,7 @@ i18n.translate('interpolated', you: 'world') # => 'Hello world!'
 ```
 
 
-## Array Localization
+## Array localization
 
 Given an array, Tater will do it's best to join the elements of the array into a
 sentence based on how many elements there are.
@@ -75,7 +80,7 @@ i18n.localize(%w[tacos enchiladas burritos]) # => "tacos, enchiladas, and burrit
 ```
 
 
-## Numeric Localization
+## Numeric localization
 
 Numeric localization (`Numeric`, `Integer`, `Float`, and `BigDecimal`) require
 filling in a separator and delimiter. For example:
@@ -100,7 +105,7 @@ i18n.localize(1000.2, delimiter: '_', separator: '+') # => "1_000+20"
 ```
 
 
-## Date and Time Localization
+## Date and time localization
 
 Date and time localization (`Date`, `Time`, and `DateTime`) require filling in
 all of the needed names and abbreviations for days and months. Here's the
@@ -185,24 +190,26 @@ i18n.localize(Date.new(1970, 1, 1), format: 'day') # => 'jeudi'
 ```
 
 
-## Cascading Lookups
+## Cascading lookups
 
 Lookups can be cascaded, i.e. pieces of the scope of the can be lopped off
 incrementally.
 
 ```ruby
 messages = {
-  'login' => {
-    'title' => 'Login',
-    'description' => 'Normal description.'
+  'en' => {
+    'login' => {
+      'title' => 'Login',
+      'description' => 'Normal description.'
 
-    'special' => {
-      'title' => 'Special Login'
+      'special' => {
+        'title' => 'Special Login'
+      }
     }
   }
 }
 
-i18n = Tater.new(messages: messages)
+i18n = Tater.new(locale: 'en', messages: messages)
 i18n.translate('login.special.title') # => 'Special Login'
 i18n.translate('login.special.description') # => 'Tater lookup failed'
 
@@ -237,14 +244,14 @@ Tater.new.translate('nope', default: 'Yep!') # => 'Yep!'
 ```
 
 
-## Procs and Messages in Ruby
+## Procs and messages in Ruby
 
 Ruby files can be used to store messages in addition to YAML, so long as the
 Ruby file returns a `Hash` when evalled.
 
 ```ruby
 {
-  en: {
+  'en' => {
     ruby: proc do |key, options = {}|
       "Hey #{ key }!"
     end
@@ -253,10 +260,11 @@ Ruby file returns a `Hash` when evalled.
 ```
 
 
-## Multiple Locales
+## Multiple locales
 
-If you like to check multiple locales and pull the first matching one out, you
-can pass the `:locales` option an array of top-level locale keys.
+If you would like to check multiple locales and pull the first matching one out,
+you can pass the `:locales` option to initialization or the `translate` method
+with an array of top-level locale keys.
 
 ```ruby
 messages = {
@@ -272,9 +280,14 @@ messages = {
 i18n = Tater.new(messages: messages)
 i18n.translate('title', locales: %w[fr en]) # => 'la connexion'
 i18n.translate('description', locales: %w[fr en]) # => 'English description.'
+
+# OR
+i18n = Tater.new(messages: messages, locales: %w[fr en])
+i18n.translate('title') # => 'la connexion'
+i18n.translate('description') # => 'English description.'
 ```
 
-Locales will tried in order and which one matches first will be returned.
+Locales will be tried in order and whichever one matches first will be returned.
 
 
 ## Limitations
