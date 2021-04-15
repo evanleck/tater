@@ -223,7 +223,7 @@ class Tater
       if precision.zero?
         integer
       else
-        [integer, fraction&.ljust(precision, '0')].compact.join(separator)
+        [integer, fraction&.ljust(precision, '0')&.slice(0, precision)].compact.join(separator)
       end
     when Date, Time, DateTime
       format = lookup("#{ object.class.to_s.downcase }.formats.#{ options[:format] || DEFAULT }", locale: options[:locale]) || options[:format] || DEFAULT

@@ -1,5 +1,10 @@
 # Tater Changelog
 
+## 2.0.1
+
+Fix an issue where `precision` would not guarantee a maximum length if more than
+`precision` characters were present in the fractional part of a number.
+
 ## 2.0.0
 
 - **Breaking:** the default `en` locale has been removed. Without supplying a

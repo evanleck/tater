@@ -265,6 +265,12 @@ describe Tater do
       assert_equal '1NAH12', i18n.localize(BigDecimal('1.12'))
     end
 
+    it 'accomodates precision' do
+      assert_equal '10NAH00', i18n.localize(BigDecimal('10'))
+      assert_equal '10', i18n.localize(BigDecimal('10'), precision: 0)
+      assert_equal '10NAH00', i18n.localize(BigDecimal('10.00234'))
+    end
+
     it 'allows overriding the delimiter and separator' do
       assert_equal '10WOO000NAH12', i18n.localize(10_000.12, delimiter: 'WOO')
       assert_equal '10TURKEYS000YA12', i18n.localize(10_000.12, separator: 'YA')
