@@ -6,6 +6,7 @@ require 'yaml'
 # designed for speed and simplicity.
 class Tater
   class MissingLocalizationFormat < ArgumentError; end
+
   class UnLocalizableObject < ArgumentError; end
 
   module Utils # :nodoc:

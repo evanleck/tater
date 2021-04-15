@@ -118,7 +118,7 @@ describe Tater do
     end
 
     it 'updates the available list when new messages are loaded' do
-      i18n.load(messages: { 'added' => { 'hey' => 'yeah' }})
+      i18n.load(messages: { 'added' => { 'hey' => 'yeah' } })
 
       assert_equal %w[en delimiter_only separator_only fr added].sort, i18n.available.sort
     end
