@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.description = spec.summary
   spec.homepage    = 'https://github.com/evanleck/tater'
   spec.license     = 'MIT'
-  spec.files       = ['lib/tater.rb', 'README.md', 'LICENSE.txt']
+  spec.files       = ['lib/tater.rb', 'README.org', 'LICENSE.txt']
   spec.test_files  = Dir.glob('test/**/*')
 
   spec.platform                  = Gem::Platform::RUBY
