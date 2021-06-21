@@ -215,16 +215,20 @@ class Tater
       raise(MissingLocalizationFormat, "Numeric localization delimiter ('numeric.delimiter') missing or not passed as option :delimiter") unless delimiter
       raise(MissingLocalizationFormat, "Numeric localization separator ('numeric.separator') missing or not passed as option :separator") unless separator
 
-      # Heavily cribbed from Rails.
-      integer, fraction = Utils.string_from_numeric(object).split('.')
-      integer.gsub!(DELIMITING_REGEX) do |number|
-        "#{ number }#{ delimiter }"
+      # Break the number up into integer and fraction parts.
+      integer = Utils.string_from_numeric(object)
+      integer, fraction = integer.split('.') unless object.is_a?(Integer)
+
+      if integer.length > 3
+        integer.gsub!(DELIMITING_REGEX) do |number|
+          "#{ number }#{ delimiter }"
+        end
       end
 
-      if precision.zero?
+      if precision.zero? || fraction.nil?
         integer
       else
-        [integer, fraction&.ljust(precision, '0')&.slice(0, precision)].compact.join(separator)
+        "#{ integer }#{ separator }#{ fraction.ljust(precision, '0').slice(0, precision) }"
       end
     when Date, Time, DateTime
       format = lookup("#{ object.class.to_s.downcase }.formats.#{ options[:format] || DEFAULT }", locale: options[:locale]) || options[:format] || DEFAULT

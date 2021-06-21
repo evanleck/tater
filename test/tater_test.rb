@@ -265,10 +265,28 @@ describe Tater do
       assert_equal '1NAH12', i18n.localize(BigDecimal('1.12'))
     end
 
-    it 'accomodates precision' do
-      assert_equal '10NAH00', i18n.localize(BigDecimal('10'))
-      assert_equal '10', i18n.localize(BigDecimal('10'), precision: 0)
-      assert_equal '10NAH00', i18n.localize(BigDecimal('10.00234'))
+    describe 'precision option' do
+      it 'defaults to 2' do
+        assert_equal '10NAH00', i18n.localize(BigDecimal('10'))
+        assert_equal '10NAH00', i18n.localize(10.0)
+      end
+
+      it 'defaults to zero for integers' do
+        assert_equal '10', i18n.localize(10)
+      end
+
+      it 'removes fractional pieces when the precision is 0' do
+        assert_equal '10', i18n.localize(BigDecimal('10.123456'), precision: 0)
+        assert_equal '10', i18n.localize(10.123456, precision: 0)
+
+        assert_equal '10', i18n.localize(BigDecimal('10.12'), precision: 0)
+        assert_equal '10', i18n.localize(10.12, precision: 0)
+      end
+
+      it 'truncates long values to the desired precision' do
+        assert_equal '10NAH00', i18n.localize(BigDecimal('10.00234'))
+        assert_equal '10NAH00', i18n.localize(10.00234)
+      end
     end
 
     it 'allows overriding the delimiter and separator' do

@@ -1,5 +1,46 @@
 * Tater Changelog
 
+** 2.0.2
+
+Add optimizations for localizing small numbers that don't require delimiting and
+numbers without fractional parts.
+
+Before:
+
+#+begin_example
+    100    537.853k (± 0.5%) i/s -      2.699M in   5.018053s
+  100.0    390.349k (± 0.5%) i/s -      1.973M in   5.054799s
+  1000    538.111k (± 1.3%) i/s -      2.696M in   5.010775s
+1000.0    379.626k (± 2.4%) i/s -      1.901M in   5.009570s
+#+end_example
+
+After:
+
+#+begin_example
+    100      1.219M (± 3.5%) i/s -      6.094M in   5.006669s
+  100.0    507.402k (± 0.9%) i/s -      2.546M in   5.018059s
+  1000      1.240M (± 0.8%) i/s -      6.244M in   5.037353s
+1000.0    506.906k (± 0.6%) i/s -      2.578M in   5.086512s
+#+end_example
+
+Benchmark code follows.
+
+#+begin_src ruby
+i18n = Tater.new(locale: 'en')
+i18n.load(messages: { 'en' => { 'numeric' => { 'delimiter' => ',', 'separator' => '.' }}})
+
+BIG = BigDecimal('100.0')
+
+Benchmark.ips do |x|
+  x.report('100') { i18n.localize(100) }
+  x.report('100.0') { i18n.localize(BIG) }
+  x.report('1000') { i18n.localize(100) }
+  x.report('1000.0') { i18n.localize(BIG) }
+
+  x.compare!
+end
+#+end_src
+
 ** 2.0.1
 
 Fix an issue where =precision= would not guarantee a maximum length if
