@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 require 'bigdecimal'
+require 'date'
+require 'time'
 require 'yaml'
 
 # Tater is a internationalization (i18n) and localization (l10n) library
@@ -190,9 +192,9 @@ class Tater
   # @option options [String] :locale
   #   The locale to use in lieu of the current default.
   # @option options [String] :delimiter
-  #   The delimiter to use when localizing numberic values.
+  #   The delimiter to use when localizing numeric values.
   # @option options [String] :separator
-  #   The separator to use when localizing numberic values.
+  #   The separator to use when localizing numeric values.
   # @option options [String] :two_words_connector
   #   The string used to join two array elements together e.g. " and ".
   # @option options [String] :words_connector
@@ -208,70 +210,11 @@ class Tater
     when String
       object
     when Numeric
-      delimiter = options[:delimiter] || lookup('numeric.delimiter', locale: options[:locale])
-      separator = options[:separator] || lookup('numeric.separator', locale: options[:locale])
-      precision = options[:precision] || 2
-
-      raise(MissingLocalizationFormat, "Numeric localization delimiter ('numeric.delimiter') missing or not passed as option :delimiter") unless delimiter
-      raise(MissingLocalizationFormat, "Numeric localization separator ('numeric.separator') missing or not passed as option :separator") unless separator
-
-      # Break the number up into integer and fraction parts.
-      integer = Utils.string_from_numeric(object)
-      integer, fraction = integer.split('.') unless object.is_a?(Integer)
-
-      if integer.length > 3
-        integer.gsub!(DELIMITING_REGEX) do |number|
-          "#{ number }#{ delimiter }"
-        end
-      end
-
-      if precision.zero? || fraction.nil?
-        integer
-      else
-        "#{ integer }#{ separator }#{ fraction.ljust(precision, '0').slice(0, precision) }"
-      end
+      localize_numeric(object, options)
     when Date, Time, DateTime
-      format = lookup("#{ object.class.to_s.downcase }.formats.#{ options[:format] || DEFAULT }", locale: options[:locale]) || options[:format] || DEFAULT
-
-      # Heavily cribbed from I18n, many thanks to the people who sorted this out
-      # before I worked on this library.
-      format = format.gsub(SUBSTITUTION_REGEX) do |match|
-        case match
-        when '%a'  then lookup('date.abbreviated_days', locale: options[:locale])[object.wday]
-        when '%^a' then lookup('date.abbreviated_days', locale: options[:locale])[object.wday].upcase
-        when '%A'  then lookup('date.days', locale: options[:locale])[object.wday]
-        when '%^A' then lookup('date.days', locale: options[:locale])[object.wday].upcase
-        when '%b'  then lookup('date.abbreviated_months', locale: options[:locale])[object.mon - 1]
-        when '%^b' then lookup('date.abbreviated_months', locale: options[:locale])[object.mon - 1].upcase
-        when '%B'  then lookup('date.months', locale: options[:locale])[object.mon - 1]
-        when '%^B' then lookup('date.months', locale: options[:locale])[object.mon - 1].upcase
-        when '%p'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale: options[:locale]).upcase if object.respond_to?(:hour) # rubocop:disable Metrics/BlockNesting
-        when '%P'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale: options[:locale]).downcase if object.respond_to?(:hour) # rubocop:disable Metrics/BlockNesting
-        end
-      end
-
-      object.strftime(format)
+      localize_datetime(object, options)
     when Array
-      case object.length
-      when 0
-        ''
-      when 1
-        object[0]
-      when 2
-        two_words_connector = options[:two_words_connector] || lookup('array.two_words_connector', locale: options[:locale])
-
-        raise(MissingLocalizationFormat, "Sentence localization connector ('array.two_words_connector') missing or not passed as option :two_words_connector") unless two_words_connector
-
-        "#{ object[0] }#{ two_words_connector }#{ object[1] }"
-      else
-        last_word_connector = options[:last_word_connector] || lookup('array.last_word_connector', locale: options[:locale])
-        words_connector = options[:words_connector] || lookup('array.words_connector', locale: options[:locale])
-
-        raise(MissingLocalizationFormat, "Sentence localization connector ('array.last_word_connector') missing or not passed as option :last_word_connector") unless last_word_connector
-        raise(MissingLocalizationFormat, "Sentence localization connector ('array.words_connector') missing or not passed as option :words_connector") unless words_connector
-
-        "#{ object[0...-1].join(words_connector) }#{ last_word_connector }#{ object[-1] }"
-      end
+      localize_array(object, options)
     else
       raise(UnLocalizableObject, "The object class #{ object.class } cannot be localized by Tater.")
     end
@@ -419,5 +362,106 @@ class Tater
   #   The cached message or nil.
   def cached(key, locale, cascade)
     @cache.dig(locale, cascade, key)
+  end
+
+  # Localize an Array object.
+  #
+  # @param object [Array<String>]
+  #   The array to localize.
+  # @param options [Hash]
+  #   Options to configure localization.
+  # @return [String]
+  #   The localize array string.
+  def localize_array(object, options)
+    case object.length
+    when 0
+      ''
+    when 1
+      object[0]
+    when 2
+      two_words_connector = options[:two_words_connector] || lookup('array.two_words_connector', locale: options[:locale])
+
+      raise(MissingLocalizationFormat, "Sentence localization connector ('array.two_words_connector') missing or not passed as option :two_words_connector") unless two_words_connector
+
+      "#{ object[0] }#{ two_words_connector }#{ object[1] }"
+    else
+      last_word_connector = options[:last_word_connector] || lookup('array.last_word_connector', locale: options[:locale])
+      words_connector = options[:words_connector] || lookup('array.words_connector', locale: options[:locale])
+
+      raise(MissingLocalizationFormat, "Sentence localization connector ('array.last_word_connector') missing or not passed as option :last_word_connector") unless last_word_connector
+      raise(MissingLocalizationFormat, "Sentence localization connector ('array.words_connector') missing or not passed as option :words_connector") unless words_connector
+
+      "#{ object[0...-1].join(words_connector) }#{ last_word_connector }#{ object[-1] }"
+    end
+  end
+
+  # Localize a Date, DateTime, or Time object.
+  #
+  # @param object [Date, DateTime, Time]
+  #   The date-ish object to localize.
+  # @param options [Hash]
+  #   Options to configure localization.
+  # @return [String]
+  #   The localized date string.
+  def localize_datetime(object, options)
+    frmt = options[:format] || DEFAULT
+    loc = options[:locale]
+    format = lookup("#{ object.class.to_s.downcase }.formats.#{ frmt }", locale: loc) || frmt
+
+    # Heavily cribbed from I18n, many thanks to the people who sorted this out
+    # before I worked on this library.
+    format = format.gsub(SUBSTITUTION_REGEX) do |match|
+      case match
+      when '%a'  then lookup('date.abbreviated_days', locale: loc)[object.wday]
+      when '%^a' then lookup('date.abbreviated_days', locale: loc)[object.wday].upcase
+      when '%A'  then lookup('date.days', locale: loc)[object.wday]
+      when '%^A' then lookup('date.days', locale: loc)[object.wday].upcase
+      when '%b'  then lookup('date.abbreviated_months', locale: loc)[object.mon - 1]
+      when '%^b' then lookup('date.abbreviated_months', locale: loc)[object.mon - 1].upcase
+      when '%B'  then lookup('date.months', locale: loc)[object.mon - 1]
+      when '%^B' then lookup('date.months', locale: loc)[object.mon - 1].upcase
+      when '%p'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale: loc).upcase if object.respond_to?(:hour)
+      when '%P'  then lookup("time.#{ object.hour < 12 ? 'am' : 'pm' }", locale: loc).downcase if object.respond_to?(:hour)
+      end
+    end
+
+    if format.include?('%')
+      object.strftime(format)
+    else
+      format
+    end
+  end
+
+  # Localize a Numeric object.
+  #
+  # @param object [Array<String>, Date, Time, DateTime, Numeric]
+  #   The object to localize.
+  # @param options [Hash]
+  #   Options to configure localization.
+  # @return [String]
+  #   The localized numeric string.
+  def localize_numeric(object, options)
+    delimiter = options[:delimiter] || lookup('numeric.delimiter', locale: options[:locale])
+    separator = options[:separator] || lookup('numeric.separator', locale: options[:locale])
+    precision = options[:precision] || 2
+
+    raise(MissingLocalizationFormat, "Numeric localization delimiter ('numeric.delimiter') missing or not passed as option :delimiter") unless delimiter
+    raise(MissingLocalizationFormat, "Numeric localization separator ('numeric.separator') missing or not passed as option :separator") unless separator
+
+    # Break the number up into integer and fraction parts.
+    integer = Utils.string_from_numeric(object)
+    integer, fraction = integer.split('.') unless object.is_a?(Integer)
+
+    if object >= 1_000
+      integer.gsub!(DELIMITING_REGEX) do |number|
+        "#{ number }#{ delimiter }"
+      end
+    end
+
+    if precision.zero? || fraction.nil?
+      integer
+    else
+      "#{ integer }#{ separator }#{ fraction.ljust(precision, '0').slice(0, precision) }"
+    end
   end
 end

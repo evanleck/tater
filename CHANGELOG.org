@@ -1,5 +1,11 @@
 * Tater Changelog
 
+** 2.0.3
+
+Refactor =Tater#localize= to use discrete private methods for each branch of the
+=case= statement. Additionally add some minor optimizations when formatting
+numeric and date-like objects.
+
 ** 2.0.2
 
 Add optimizations for localizing small numbers that don't require delimiting and
