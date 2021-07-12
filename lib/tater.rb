@@ -109,7 +109,6 @@ class Tater
   # @param path [String]
   #   A path to search for YAML or Ruby files to load messages from.
   def initialize(cascade: false, locale: nil, messages: nil, path: nil)
-    @cache = {}
     @cascade = cascade
     @locale = locale
     @messages = {}
@@ -167,8 +166,10 @@ class Tater
 
     # Not only does this clear our cache but it establishes the basic structure
     # that we rely on in other methods.
+    @cache = {}
+
     @messages.each_key do |key|
-      @cache[key] = { true => {}, false => {} }
+      @cache[key] = { false => {}, true => {} }
     end
   end
 
@@ -223,37 +224,45 @@ class Tater
 
   # Lookup a key in the messages hash, using the current locale or an override.
   #
+  # @example Using the default locale, look up a key's value.
+  #   i18n = Tater.new(locale: 'en', messages: { 'en' => { 'greeting' => { 'world' => 'Hello, world!' } } })
+  #   i18n.lookup('greeting.world') # => "Hello, world!"
+  #
   # @param key [String]
+  #   The period-separated key path to look for within our messages.
   # @param locale [String]
-  #   A locale to use instead of our current one.
+  #   A locale to use instead of our current one, if any.
   # @param cascade [Boolean]
   #   A boolean to forcibly set the cascade option for this lookup.
   #
   # @return
   #   Basically anything that can be stored in your messages Hash.
   def lookup(key, locale: nil, cascade: nil)
-    locale = locale.nil? ? @locale : locale
-    cascade = cascade.nil? ? @cascade : cascade
+    locale =
+      if locale.nil?
+        @locale
+      else
+        locale.to_s
+      end
 
-    cached(key, locale, cascade) || begin
-      return nil unless @messages.key?(locale.to_s)
+    cascade = @cascade if cascade.nil?
 
-      path = key.split(SEPARATOR).prepend(locale).map(&:to_s)
+    @cache[locale][cascade][key] ||= begin
+      path = key.split(SEPARATOR)
 
-      message =
-        if cascade
-          while path.length >= 2
-            attempt = @messages.dig(*path)
+      message = @messages[locale].dig(*path)
+
+      if message.nil? && cascade
+        message =
+          while path.length > 1
+            path.delete_at(path.length - 2)
+            attempt = @messages[locale].dig(*path)
 
             break attempt unless attempt.nil?
-
-            path.delete_at(path.length - 2)
           end
-        else
-          @messages.dig(*path)
-        end
+      end
 
-      cache(key, locale, cascade, message)
+      message
     end
   end
 
@@ -337,32 +346,6 @@ class Tater
   alias t translate
 
   private
-
-  # @param key [String]
-  #   The cache key, often in the form "something.nested.like.this"
-  # @param locale [String]
-  #   The locale to store the value for.
-  # @param cascade [Boolean]
-  #   Was this a cascading lookup?
-  # @param message [String]
-  #   The message being cached, often a String.
-  # @return [String]
-  #   Whatever value is being cached, often a String.
-  def cache(key, locale, cascade, message)
-    @cache[locale][cascade][key] = message
-  end
-
-  # @param key [String]
-  #   The cache key, often in the form "something.nested.like.this"
-  # @param locale [String]
-  #   The locale to store the value for.
-  # @param cascade [Boolean]
-  #   Was this a cascading lookup?
-  # @return [String, nil]
-  #   The cached message or nil.
-  def cached(key, locale, cascade)
-    @cache.dig(locale, cascade, key)
-  end
 
   # Localize an Array object.
   #

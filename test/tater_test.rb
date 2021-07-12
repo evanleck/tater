@@ -1,7 +1,9 @@
 # frozen_string_literal: true
-require_relative '../lib/tater'
-require 'minitest/autorun'
+$LOAD_PATH.unshift File.expand_path('lib', __dir__)
+
 require 'date'
+require 'minitest/autorun'
+require 'tater'
 
 describe Tater do
   describe Tater::Utils do

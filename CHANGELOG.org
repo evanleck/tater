@@ -1,5 +1,45 @@
 * Tater Changelog
 
+** 2.0.4
+
+Slightly improve the performance of =Tater#lookup= and lookup caching.
+
+Benchmark code:
+
+#+begin_src ruby
+$LOAD_PATH.unshift File.expand_path('lib', __dir__)
+
+require 'benchmark/ips'
+require 'tater'
+
+i18n = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
+
+Benchmark.ips do |x|
+  x.report('hit') { i18n.lookup('cascade.tacos') }
+  x.report('cascade+hit') { i18n.lookup('cascade.tacos', cascade: true) }
+  x.report('cascade+miss') { i18n.lookup('cascade.nope.tacos', cascade: true) }
+
+  x.compare!
+end
+#+end_src
+
+Before:
+
+#+begin_example
+         hit      5.500M (± 1.1%) i/s -     27.674M in   5.032145s
+ cascade+hit      4.878M (± 0.5%) i/s -     24.488M in   5.019685s
+cascade+miss      4.807M (± 0.8%) i/s -     24.338M in   5.063039s
+#+end_example
+
+After:
+
+#+begin_example
+         hit      6.467M (± 0.9%) i/s -     32.732M in   5.061503s
+ cascade+hit      5.912M (± 0.9%) i/s -     29.766M in   5.035720s
+cascade+miss      5.883M (± 0.6%) i/s -     29.693M in   5.047433s
+#+end_example
+
+
 ** 2.0.3
 
 Refactor =Tater#localize= to use discrete private methods for each branch of the
@@ -14,8 +54,8 @@ numbers without fractional parts.
 Before:
 
 #+begin_example
-    100    537.853k (± 0.5%) i/s -      2.699M in   5.018053s
-  100.0    390.349k (± 0.5%) i/s -      1.973M in   5.054799s
+   100    537.853k (± 0.5%) i/s -      2.699M in   5.018053s
+ 100.0    390.349k (± 0.5%) i/s -      1.973M in   5.054799s
   1000    538.111k (± 1.3%) i/s -      2.696M in   5.010775s
 1000.0    379.626k (± 2.4%) i/s -      1.901M in   5.009570s
 #+end_example
@@ -23,8 +63,8 @@ Before:
 After:
 
 #+begin_example
-    100      1.219M (± 3.5%) i/s -      6.094M in   5.006669s
-  100.0    507.402k (± 0.9%) i/s -      2.546M in   5.018059s
+   100      1.219M (± 3.5%) i/s -      6.094M in   5.006669s
+ 100.0    507.402k (± 0.9%) i/s -      2.546M in   5.018059s
   1000      1.240M (± 0.8%) i/s -      6.244M in   5.037353s
 1000.0    506.906k (± 0.6%) i/s -      2.578M in   5.086512s
 #+end_example
@@ -77,14 +117,14 @@ Warming up --------------------------------------
       lookup(missing)   421.125k i/100ms
 Calculating -------------------------------------
             original      1.503M (± 1.4%) i/s -      7.607M in   5.063043s
-    original(missing)      1.550M (± 0.9%) i/s -      7.874M in   5.080857s
+   original(missing)      1.550M (± 0.9%) i/s -      7.874M in   5.080857s
               lookup      5.749M (± 1.9%) i/s -     28.872M in   5.024032s
-      lookup(missing)      4.268M (± 0.3%) i/s -     21.477M in   5.032214s
+     lookup(missing)      4.268M (± 0.3%) i/s -     21.477M in   5.032214s
 
 Comparison:
               lookup:  5748968.8 i/s
-      lookup(missing):  4268014.7 i/s - 1.35x  (± 0.00) slower
-    original(missing):  1549883.6 i/s - 3.71x  (± 0.00) slower
+     lookup(missing):  4268014.7 i/s - 1.35x  (± 0.00) slower
+   original(missing):  1549883.6 i/s - 3.71x  (± 0.00) slower
             original:  1502656.0 i/s - 3.83x  (± 0.00) slower
 #+end_example
 

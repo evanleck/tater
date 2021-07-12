@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 Gem::Specification.new do |spec|
   spec.name    = 'tater'
-  spec.version = '2.0.3'
+  spec.version = '2.0.4'
   spec.authors = ['Evan Lecklider']
   spec.email   = ['evan@lecklider.com']
 
@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rubocop'
   spec.add_development_dependency 'rubocop-minitest'
+  spec.add_development_dependency 'rubocop-packaging'
   spec.add_development_dependency 'rubocop-performance'
   spec.add_development_dependency 'rubocop-rake'
 end
