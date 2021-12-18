@@ -4,6 +4,7 @@ require 'date'
 require 'time'
 require 'yaml'
 require 'tater/utils'
+require 'tater/hash' unless Hash.method_defined?(:except)
 
 # Tater is a internationalization (i18n) and localization (l10n) library
 # designed for speed and simplicity.
@@ -16,6 +17,9 @@ class Tater
   HASH = {}.freeze
   SEPARATOR = '.'
   SUBSTITUTION_REGEX = /%(|\^)[aAbBpP]/.freeze
+
+  # Needed for Ruby < 3.
+  using HashExcept unless Hash.method_defined?(:except)
 
   # @return [String]
   attr_reader :locale
