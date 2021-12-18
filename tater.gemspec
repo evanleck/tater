@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata = {
     'bug_tracker_uri' => 'https://github.com/evanleck/tater/issues',
+    'rubygems_mfa_required' => 'true',
     'source_code_uri' => 'https://github.com/evanleck/tater'
   }
 
