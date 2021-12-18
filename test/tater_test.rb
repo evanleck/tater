@@ -61,6 +61,20 @@ describe Tater do
         assert_equal '1.0', Tater::Utils.string_from_numeric(BigDecimal('1'))
       end
     end
+
+    describe '#interpolation_string?' do
+      def is?(arg)
+        Tater::Utils.interpolation_string?(arg)
+      end
+
+      it 'checks whether a string contains interpolation placeholders' do
+        assert is?('Hey %{there}!')
+        assert is?('Hey %<there>s!')
+        refute is?('Nah, this is fine')
+        refute is?("<b>HTML shouldn't count")
+        refute is?("A single % shouldn't count")
+      end
+    end
   end
 
   describe '#available?' do
@@ -143,6 +157,10 @@ describe Tater do
       assert_nil i18n.lookup('nope')
     end
 
+    it 'returns arbitrary data at keys' do
+      assert_equal({ 'key' => 'This key is deeper' }, i18n.lookup('deep'))
+    end
+
     it 'cascades' do
       assert_equal 'Delicious', i18n.lookup('cascade.nope.tacos', cascade: true)
       assert_equal 'Whoaa', i18n.lookup('cascade.another.nope.crazy', cascade: true)
@@ -164,8 +182,8 @@ describe Tater do
       assert_equal 'This key is deeper', i18n.translate('deep.key')
     end
 
-    it 'returns a hash for nested keys' do
-      assert_equal({ 'key' => 'This key is deeper' }, i18n.translate('deep'))
+    it 'does not return a hash for nested keys' do
+      assert_equal 'Tater lookup failed: en.deep', i18n.translate('deep')
     end
 
     it 'interpolates additional variables' do
@@ -180,10 +198,6 @@ describe Tater do
 
     it 'returns a message for failed translations' do
       assert_equal 'Tater lookup failed: en.nope', i18n.translate('nope')
-    end
-
-    it 'is aliased as t' do
-      assert_equal 'This is a title', i18n.t('title')
     end
 
     it 'cascades lookups' do
@@ -203,9 +217,12 @@ describe Tater do
       assert_equal 'Tater lookup failed: ["fr", "en"].neither', i18n.translate('neither', locales: %w[fr en])
     end
 
-    it 'finds Ruby files as well' do
+    it 'finds Ruby files' do
       assert_equal 'Hey ruby!', i18n.translate('ruby')
-      assert_equal 'Hey options!', i18n.translate('options', options: 'options')
+    end
+
+    it 'does not interpolate messages returned by procs' do
+      assert_equal 'Hey %{options}!', i18n.translate('options', options: 'options')
     end
   end
 
@@ -314,10 +331,6 @@ describe Tater do
       assert_raises(Tater::MissingLocalizationFormat) do
         i18n.localize(10, locale: 'delimiter_only')
       end
-    end
-
-    it 'is aliased l' do
-      assert_equal '1970/1/1', i18n.l(Date.new(1970, 1, 1))
     end
 
     describe 'month, day, and AM/PM names' do

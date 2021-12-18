@@ -3,90 +3,13 @@ require 'bigdecimal'
 require 'date'
 require 'time'
 require 'yaml'
+require 'tater/utils'
 
 # Tater is a internationalization (i18n) and localization (l10n) library
 # designed for speed and simplicity.
 class Tater
   class MissingLocalizationFormat < ArgumentError; end
-
   class UnLocalizableObject < ArgumentError; end
-
-  module Utils # :nodoc:
-    # Merge all the way down.
-    #
-    # @param to [Hash]
-    #   The target Hash to merge into.
-    # @param from [Hash]
-    #   The Hash to copy values from.
-    # @return [Hash]
-    def self.deep_merge(to, from)
-      to.merge(from) do |_key, left, right|
-        if left.is_a?(Hash) && right.is_a?(Hash)
-          Utils.deep_merge(left, right)
-        else
-          right
-        end
-      end
-    end
-
-    # Transform keys all the way down.
-    #
-    # @param hash [Hash]
-    #   The Hash to stringify keys for.
-    # @return [Hash]
-    def self.deep_stringify_keys(hash)
-      hash.transform_keys(&:to_s).transform_values do |value|
-        if value.is_a?(Hash)
-          Utils.deep_stringify_keys(value)
-        else
-          value
-        end
-      end
-    end
-
-    # Freeze all the way down.
-    #
-    # @param hash [Hash]
-    # @return [Hash]
-    def self.deep_freeze(hash)
-      hash.transform_keys(&:freeze).transform_values do |value|
-        if value.is_a?(Hash)
-          Utils.deep_freeze(value)
-        else
-          value.freeze
-        end
-      end.freeze
-    end
-
-    # Try to interpolate these things, if one of them is a string.
-    #
-    # @param string [String]
-    #   The target string to interpolate into.
-    # @param options [Hash]
-    #   The values to interpolate into the target string.
-    #
-    # @return [String]
-    def self.interpolate(string, options = HASH)
-      return string unless string.is_a?(String)
-      return string if options.empty?
-
-      format(string, options)
-    end
-
-    # Convert a Numeric to a string, particularly formatting BigDecimals to a
-    # Float-like string representation.
-    #
-    # @param numeric [Numeric]
-    #
-    # @return [String]
-    def self.string_from_numeric(numeric)
-      if numeric.is_a?(BigDecimal)
-        numeric.to_s('F')
-      else
-        numeric.to_s
-      end
-    end
-  end
 
   DEFAULT = 'default'
   DELIMITING_REGEX = /(\d)(?=(\d\d\d)+(?!\d))/.freeze
@@ -154,7 +77,7 @@ class Tater
       end
 
       Dir.glob(File.join(path, '**', '*.rb')).each do |file|
-        @messages = Utils.deep_merge(@messages, Utils.deep_stringify_keys(eval(IO.read(file), binding, file))) # rubocop:disable Security/Eval
+        @messages = Utils.deep_merge(@messages, Utils.deep_stringify_keys(eval(File.read(file), binding, file))) # rubocop:disable Security/Eval
       end
     end
 
@@ -220,7 +143,6 @@ class Tater
       raise(UnLocalizableObject, "The object class #{ object.class } cannot be localized by Tater.")
     end
   end
-  alias l localize
 
   # Lookup a key in the messages hash, using the current locale or an override.
   #
@@ -325,25 +247,39 @@ class Tater
   #   The translated and interpreted string, if found, or any data at the
   #   defined key.
   def translate(key, options = HASH)
-    message =
-      if options.key?(:locales)
-        options[:locales].append(@locale) if @locale && !options[:locales].include?(@locale)
+    if options.empty?
+      message = lookup(key)
 
-        options[:locales].find do |accept|
-          found = lookup(key, locale: accept, cascade: options[:cascade])
-
-          break found unless found.nil?
-        end
+      if message.is_a?(Proc) # rubocop:disable Style/CaseLikeIf
+        message.call(key)
+      elsif message.is_a?(String)
+        message
       else
-        lookup(key, locale: options[:locale], cascade: options[:cascade])
+        "Tater lookup failed: #{ locale }.#{ key }"
       end
+    else
+      message =
+        if options.key?(:locales)
+          options[:locales].append(@locale) if @locale && !options[:locales].include?(@locale)
 
-    # Call procs that should return a string.
-    message = message.call(key, options) if message.is_a?(Proc)
+          options[:locales].find do |accept|
+            found = lookup(key, locale: accept, cascade: options[:cascade])
 
-    Utils.interpolate(message, options) || options[:default] || "Tater lookup failed: #{ options[:locale] || options[:locales] || locale }.#{ key }"
+            break found unless found.nil?
+          end
+        else
+          lookup(key, locale: options[:locale], cascade: options[:cascade])
+        end
+
+      if message.is_a?(Proc) # rubocop:disable Style/CaseLikeIf
+        message.call(key, options.except(:cascade, :default, :locale, :locales))
+      elsif message.is_a?(String)
+        Utils.interpolate(message, options.except(:cascade, :default, :locale, :locales))
+      else
+        options[:default] || "Tater lookup failed: #{ options[:locale] || options[:locales] || locale }.#{ key }"
+      end
+    end
   end
-  alias t translate
 
   private
 

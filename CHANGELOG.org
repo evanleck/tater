@@ -1,5 +1,71 @@
 * Tater Changelog
 
+** 3.0.0
+
+*** Breaking changes
+
+1. =Tater#translate= no longer returns arbitrary data stored at the requested
+   key, it will only return strings now. To retrieve arbitrary data use
+   =Tater#lookup=.
+2. The aliases =Tater#t= and =Tater#l= have been removed. To restore these
+   aliases you can require ='tater/aliases'= e.g. in your =Gemfile=: =gem
+   'tater', require: 'tater/aliases'=.
+3. Internally used option keys =:cascade=, =:default=, =:locale=, and =:locales=
+    are no longer passed to the block or interpolation string in
+   =Tater#translate=.
+
+*** Non-breaking changes
+
+The performance of =Tater#translate= has been improved by making changes on a
+few fronts.
+
+1. =Tater#translate= now has an optimization for an empty options hash.
+2. =Tater::Utils#interpolate= now checks whether the string passed as the first
+   argument contains any interpolation placeholders that could be used by
+   =Kernel#format=, specifically =%{= and =%<=. If those are both absent then no
+   interpolation is performed.
+3. =Tater#translate= removes interally used option keys from the options hash
+   before handing them over to =Tater::Utils#interpolate=, allowing that method
+   to skip =Kernel#format= when those irrelevant options were the only ones
+   passed to =#translate=.
+
+Benchmark code:
+
+#+begin_src ruby
+$LOAD_PATH.unshift File.expand_path('lib', __dir__)
+
+require 'benchmark/ips'
+require 'tater'
+
+i18n = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
+
+Benchmark.ips do |x|
+  x.report('no opts') { i18n.translate('english') }
+  x.report('legit') { i18n.translate('english', legit: 'legit') }
+  x.report('default') { i18n.translate('english', default: 'default') }
+
+  x.compare!
+end
+#+end_src
+
+Before:
+
+#+begin_example
+no opts      2.649M (± 2.2%) i/s -     13.256M in   5.006062s
+  legit      1.347M (± 2.0%) i/s -      6.818M in   5.062726s
+default      1.338M (± 2.8%) i/s -      6.773M in   5.065340s
+#+end_example
+
+
+After:
+
+#+begin_example
+no opts      3.735M (± 2.2%) i/s -     18.984M in   5.085179s
+  legit      1.293M (± 2.2%) i/s -      6.581M in   5.092466s
+default      1.667M (± 1.9%) i/s -      8.411M in   5.048828s
+#+end_example
+
+
 ** 2.0.4
 
 Slightly improve the performance of =Tater#lookup= and lookup caching.
