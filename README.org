@@ -212,8 +212,8 @@ i18n.translate('login.special.description', cascade: true) # => 'Normal descript
 With cascade, the final key stays the same, but pieces of the scope get lopped
 off. In this case, lookups will be tried in this order:
 
-1. ='login.special.description'=
-2. ='login.description'=
+1. =login.special.description=
+2. =login.description=
 
 This can be useful when you want to override some messages but don't want to
 have to copy all of the other, non-overwritten messages.
