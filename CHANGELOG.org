@@ -1,5 +1,9 @@
 * Tater Changelog
 
+** 3.0.1
+
+Fix missing =Hash#except= in Ruby < 3.
+
 ** 3.0.0
 
 *** Breaking changes
