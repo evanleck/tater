@@ -1,5 +1,9 @@
 * Tater Changelog
 
+** 3.0.2
+
+Fix =LoadError= when requiring =tater/utils=.
+
 ** 3.0.1
 
 Fix missing =Hash#except= in Ruby < 3.
