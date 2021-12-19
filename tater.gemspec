@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 Gem::Specification.new do |spec|
   spec.name    = 'tater'
-  spec.version = '3.0.2'
+  spec.version = '3.0.3'
   spec.authors = ['Evan Lecklider']
   spec.email   = ['evan@lecklider.com']
 
@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.description = spec.summary
   spec.homepage    = 'https://github.com/evanleck/tater'
   spec.license     = 'MIT'
-  spec.files       = ['lib/tater.rb', 'README.org', 'LICENSE.txt']
+  spec.files       = Dir.glob('lib/**/*.rb') + ['README.org', 'LICENSE.txt']
   spec.test_files  = Dir.glob('test/**/*')
 
   spec.platform                  = Gem::Platform::RUBY
