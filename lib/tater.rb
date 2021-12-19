@@ -3,8 +3,8 @@ require 'bigdecimal'
 require 'date'
 require 'time'
 require 'yaml'
-require 'tater/utils'
-require 'tater/hash' unless Hash.method_defined?(:except)
+require_relative 'tater/utils'
+require_relative 'tater/hash' unless Hash.method_defined?(:except)
 
 # Tater is a internationalization (i18n) and localization (l10n) library
 # designed for speed and simplicity.
