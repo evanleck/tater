@@ -210,20 +210,24 @@ class Tater
   #
   # @return [Boolean]
   def includes?(key, options = HASH)
-    message =
-      if options.key?(:locales)
-        options[:locales].append(@locale) if @locale && !options[:locales].include?(@locale)
+    if options.empty?
+      !lookup(key).nil?
+    else
+      message =
+        if options.key?(:locales)
+          options[:locales].append(@locale) if @locale && !options[:locales].include?(@locale)
 
-        options[:locales].find do |accept|
-          found = lookup(key, locale: accept, cascade: options[:cascade])
+          options[:locales].find do |accept|
+            found = lookup(key, locale: accept, cascade: options[:cascade])
 
-          break found unless found.nil?
+            break found unless found.nil?
+          end
+        else
+          lookup(key, locale: options[:locale], cascade: options[:cascade])
         end
-      else
-        lookup(key, locale: options[:locale], cascade: options[:cascade])
-      end
 
-    !message.nil?
+      !message.nil?
+    end
   end
 
   # Translate a key path and optional interpolation arguments into a string.

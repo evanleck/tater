@@ -1,5 +1,9 @@
 * Tater Changelog
 
+** 3.0.4
+
+Add an optimization for empty options to =Tater#includes?=.
+
 ** 3.0.3
 
 Really fix the =LoadError= by actually including the files in lib/tater in the gem /*facepalm*/.
