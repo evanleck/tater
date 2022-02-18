@@ -1,6 +1,7 @@
 * Tater
 
 [[https://badge.fury.io/rb/tater][https://badge.fury.io/rb/tater.svg]]
+[[https://github.com/evanleck/tater/actions/workflows/main.yml][https://github.com/evanleck/tater/actions/workflows/main.yml/badge.svg]]
 
 Tater is an internationalization (i18n) and localization (l10n) library designed
 for simplicity. It doesn't do everything that other libraries do, but that's by
