@@ -1,7 +1,9 @@
 # frozen_string_literal: true
+require_relative 'lib/tater/version'
+
 Gem::Specification.new do |spec|
   spec.name    = 'tater'
-  spec.version = '3.0.4'
+  spec.version = Tater::VERSION
   spec.authors = ['Evan Lecklider']
   spec.email   = ['evan@lecklider.com']
 

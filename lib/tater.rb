@@ -4,8 +4,9 @@ require 'date'
 require 'time'
 require 'yaml'
 
-require 'tater/utils'
 require 'tater/hash' unless Hash.method_defined?(:except)
+require 'tater/utils'
+require 'tater/version'
 
 # Tater is a internationalization (i18n) and localization (l10n) library
 # designed for speed and simplicity.
