@@ -46,6 +46,11 @@ class Tater
     load(messages: messages) if messages
   end
 
+  # @return [String]
+  def inspect
+    %(#<Tater:#{ object_id } @cascade=#{ @cascade } @locale="#{ @locale }" @available=#{ @available }>)
+  end
+
   # Do lookups cascade by default?
   #
   # @return [Boolean]

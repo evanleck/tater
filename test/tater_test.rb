@@ -455,4 +455,11 @@ describe Tater do
       refute i18n.includes?('cascade.nope.tacos', cascade: false)
     end
   end
+
+  describe '#inspect' do
+    it 'returns a stringified version of the object' do
+      obj = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
+      assert_equal %(#<Tater:#{ obj.object_id } @cascade=#{ obj.cascades? } @locale="#{ obj.locale }" @available=["en", "fr", "delimiter_only", "separator_only"]>), obj.inspect
+    end
+  end
 end
