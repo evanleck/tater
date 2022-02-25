@@ -1,7 +1,10 @@
 # http://rubocop.readthedocs.io
 # https://github.com/bbatsov/rubocop/blob/master/config/enabled.yml
 require:
+  - rubocop-minitest
+  - rubocop-packaging
   - rubocop-performance
+  - rubocop-rake
 
 AllCops:
   DisplayCopNames: true
