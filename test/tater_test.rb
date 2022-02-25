@@ -459,7 +459,7 @@ describe Tater do
   describe '#inspect' do
     it 'returns a stringified version of the object' do
       obj = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
-      assert_equal %(#<Tater:#{ obj.object_id } @cascade=#{ obj.cascades? } @locale="#{ obj.locale }" @available=["en", "fr", "delimiter_only", "separator_only"]>), obj.inspect
+      assert_equal %(#<Tater:#{ obj.object_id } @cascade=#{ obj.cascades? } @locale="#{ obj.locale }" @available=#{ obj.available }>), obj.inspect
     end
   end
 
@@ -470,7 +470,7 @@ describe Tater do
 
       assert obj.includes?('deep')
       assert_equal 'This key is deeper', obj.translate('deep.key')
-      assert_equal %w[en fr delimiter_only separator_only], obj.available
+      assert_equal %w[delimiter_only en fr separator_only], obj.available
 
       assert obj.frozen?
     end

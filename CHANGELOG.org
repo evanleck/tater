@@ -6,6 +6,7 @@
    instances cannot load additional messages or assign a new default locale once
    frozen.
 2. Add =Tater#inspect=.
+3. Sort the entries in =Tater#available=.
 
 ** 3.0.4
 

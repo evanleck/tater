@@ -96,7 +96,7 @@ class Tater
     @messages = Utils.deep_freeze(@messages)
 
     # Update our available locales.
-    @available.replace(@messages.keys)
+    @available.replace(@messages.keys.map(&:to_s).sort)
 
     # Not only does this clear our cache but it establishes the basic structure
     # that we rely on in other methods.
