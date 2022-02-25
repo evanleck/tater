@@ -239,7 +239,7 @@ Tater.new.translate('nope', default: 'Yep!') # => 'Yep!'
 ** Procs and messages in Ruby
 
 Ruby files can be used to store messages in addition to YAML, so long as the
-Ruby file returns a =Hash= when evalled.
+Ruby file returns a =Hash= when evaluated.
 
 #+begin_src ruby
 {
@@ -282,7 +282,7 @@ Locales will be tried in order and whichever one matches first will be returned.
 
 ** Limitations
 
-- It is not pluggable, it does what it does and that's it.
+- It is not plug-able, it does what it does and that's it.
 - It doesn't handle pluralization yet, though it may in the future.
 
 ** Why?
@@ -293,6 +293,6 @@ file that handles the basics of lookup and interpolation.
 
 ** Trivia
 
-I was orininally going to call this library "Translator" but with a [[https://en.wikipedia.org/wiki/Numeronym][numeronym]]
+I was originally going to call this library "Translator" but with a [[https://en.wikipedia.org/wiki/Numeronym][numeronym]]
 like I18n: "t8r".  I looked at it for a while but I read it as "tater" instead
 of "tee-eight-arr" so I figured I'd just name it Tater. Tater the translator.

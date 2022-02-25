@@ -1,5 +1,12 @@
 * Tater Changelog
 
+** 3.0.5
+
+1. Modify some internals to allow freezing an instance of =Tater=. Note that
+   instances cannot load additional messages or assign a new default locale once
+   frozen.
+2. Add =Tater#inspect=.
+
 ** 3.0.4
 
 Add an optimization for empty options to =Tater#includes?=.
@@ -23,7 +30,7 @@ Fix missing =Hash#except= in Ruby < 3.
 1. =Tater#translate= no longer returns arbitrary data stored at the requested
    key, it will only return strings now. To retrieve arbitrary data use
    =Tater#lookup=.
-2. The aliases =Tater#t= and =Tater#l= have been removed. To restore these
+2. Remove the aliases =Tater#t= and =Tater#l=. To restore these
    aliases you can require ='tater/aliases'= e.g. in your =Gemfile=: =gem
    'tater', require: 'tater/aliases'=.
 3. Internally used option keys =:cascade=, =:default=, =:locale=, and =:locales=
@@ -32,8 +39,7 @@ Fix missing =Hash#except= in Ruby < 3.
 
 *** Non-breaking changes
 
-The performance of =Tater#translate= has been improved by making changes on a
-few fronts.
+Improve the performance of =Tater#translate=.
 
 1. =Tater#translate= now has an optimization for an empty options hash.
 2. =Tater::Utils#interpolate= now checks whether the string passed as the first
