@@ -462,4 +462,25 @@ describe Tater do
       assert_equal %(#<Tater:#{ obj.object_id } @cascade=#{ obj.cascades? } @locale="#{ obj.locale }" @available=["en", "fr", "delimiter_only", "separator_only"]>), obj.inspect
     end
   end
+
+  describe '#freeze' do
+    it 'can be frozen' do
+      obj = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
+      obj.freeze
+
+      assert obj.includes?('deep')
+      assert_equal 'This key is deeper', obj.translate('deep.key')
+      assert_equal %w[en fr delimiter_only separator_only], obj.available
+
+      assert obj.frozen?
+    end
+
+    it 'throws an error if modified after being frozen' do
+      obj = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
+      obj.freeze
+
+      assert_raises(FrozenError) { obj.locale = 'en' }
+      assert_raises(FrozenError) { obj.load(messages: { more: 'Messages' }) }
+    end
+  end
 end

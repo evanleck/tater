@@ -23,6 +23,11 @@ class Tater
   # Needed for Ruby < 3.
   using HashExcept unless Hash.method_defined?(:except)
 
+  # An array of the available locale codes found in loaded messages.
+  #
+  # @return [Array<String>]
+  attr_reader :available
+
   # @return [String]
   attr_reader :locale
 
@@ -38,6 +43,8 @@ class Tater
   # @param path [String]
   #   A path to search for YAML or Ruby files to load messages from.
   def initialize(cascade: false, locale: nil, messages: nil, path: nil)
+    @available = []
+    @cache = {}
     @cascade = cascade
     @locale = locale
     @messages = {}
@@ -56,13 +63,6 @@ class Tater
   # @return [Boolean]
   def cascades?
     @cascade
-  end
-
-  # An array of the available locale codes found in loaded messages.
-  #
-  # @return [Array]
-  def available
-    @available ||= messages.keys
   end
 
   # Is this locale available in our current set of messages?
@@ -95,12 +95,12 @@ class Tater
     @messages = Utils.deep_merge(@messages, Utils.deep_stringify_keys(messages)) if messages
     @messages = Utils.deep_freeze(@messages)
 
-    # Gotta recalculate available locales after updating.
-    remove_instance_variable(:@available) if instance_variable_defined?(:@available)
+    # Update our available locales.
+    @available.replace(@messages.keys)
 
     # Not only does this clear our cache but it establishes the basic structure
     # that we rely on in other methods.
-    @cache = {}
+    @cache.clear
 
     @messages.each_key do |key|
       @cache[key] = { false => {}, true => {} }
@@ -112,7 +112,8 @@ class Tater
   # @param locale [String]
   #   The locale code to set as our default.
   def locale=(locale)
-    @locale = locale.to_s if available?(locale)
+    str = locale.to_s
+    @locale = str if available?(str)
   end
 
   # Localize an Array, Date, Time, DateTime, or Numeric object.
