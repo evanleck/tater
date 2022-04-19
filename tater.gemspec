@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.platform                  = Gem::Platform::RUBY
   spec.require_path              = 'lib'
-  spec.required_ruby_version     = '>= 2.5.0'
+  spec.required_ruby_version     = '>= 2.7.0'
   spec.required_rubygems_version = '>= 2.0'
 
   spec.metadata['bug_tracker_uri'] = 'https://github.com/evanleck/tater/issues'
