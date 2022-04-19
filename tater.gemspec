@@ -19,18 +19,9 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version     = '>= 2.5.0'
   spec.required_rubygems_version = '>= 2.0'
 
-  spec.metadata = {
-    'bug_tracker_uri' => 'https://github.com/evanleck/tater/issues',
-    'rubygems_mfa_required' => 'true',
-    'source_code_uri' => 'https://github.com/evanleck/tater'
-  }
-
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'minitest'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rubocop'
-  spec.add_development_dependency 'rubocop-minitest'
-  spec.add_development_dependency 'rubocop-packaging'
-  spec.add_development_dependency 'rubocop-performance'
-  spec.add_development_dependency 'rubocop-rake'
+  spec.metadata['bug_tracker_uri'] = 'https://github.com/evanleck/tater/issues'
+  spec.metadata['changelog_uri'] = 'https://github.com/evanleck/tater/blob/main/CHANGELOG.org'
+  spec.metadata['homepage_uri'] = spec.homepage
+  spec.metadata['rubygems_mfa_required'] = 'true'
+  spec.metadata['source_code_uri'] = 'https://github.com/evanleck/tater'
 end
