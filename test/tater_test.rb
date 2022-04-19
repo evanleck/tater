@@ -32,7 +32,7 @@ describe Tater do
         start = Tater::Utils.deep_stringify_keys({ en: { login: { title: 'Hello!' } } })
         finish = Tater::Utils.deep_freeze(start)
 
-        assert finish.frozen?
+        assert_predicate finish, :frozen?
         assert finish.keys.all?(&:frozen?)
         assert finish.values.all?(&:frozen?)
       end
@@ -118,7 +118,7 @@ describe Tater do
     it 'freezes messages after loading' do
       i18n = Tater.new(messages: { 'hey' => 'Oh hi' })
 
-      assert i18n.messages.frozen?
+      assert_predicate i18n.messages, :frozen?
       assert i18n.messages.keys.all?(&:frozen?)
       assert i18n.messages.values.all?(&:frozen?)
     end
@@ -423,11 +423,11 @@ describe Tater do
     end
 
     it 'returns false by default' do
-      refute default.cascades?
+      refute_predicate default, :cascades?
     end
 
     it 'returns true when passed during initialization' do
-      assert cascade.cascades?
+      assert_predicate cascade, :cascades?
     end
   end
 
@@ -472,7 +472,7 @@ describe Tater do
       assert_equal 'This key is deeper', obj.translate('deep.key')
       assert_equal %w[delimiter_only en fr separator_only], obj.available
 
-      assert obj.frozen?
+      assert_predicate obj, :frozen?
     end
 
     it 'throws an error if modified after being frozen' do
