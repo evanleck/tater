@@ -1,40 +1,40 @@
-* Tater
+# Tater
 
-[[https://badge.fury.io/rb/tater][https://badge.fury.io/rb/tater.svg]]
-[[https://github.com/evanleck/tater/actions/workflows/main.yml][https://github.com/evanleck/tater/actions/workflows/main.yml/badge.svg]]
+[![](https://badge.fury.io/rb/tater.svg)](https://badge.fury.io/rb/tater)
+[![](https://github.com/evanleck/tater/actions/workflows/main.yml/badge.svg)](https://github.com/evanleck/tater/actions/workflows/main.yml)
 
 Tater is an internationalization (i18n) and localization (l10n) library designed
-for simplicity. It doesn't do everything that other libraries do, but that's by
-design.
+for simplicity. It doesn't do everything that other libraries do, but that's
+by design.
 
-Under the hood, Tater uses a Hash to store the messages, the =dig= method for
-lookups, =strftime= for date and time localizations, and =format= for
+Under the hood, Tater uses a Hash to store the messages, the `dig` method
+for lookups, `strftime` for date and time localizations, and `format` for
 interpolation. That's probably 90% of what Tater does.
 
-** Installation
+## Installation
 
 Tater requires Ruby 2.7 or higher. To install Tater, add this line to your
 application's Gemfile (or gems.rb):
 
-#+begin_src ruby
+``` ruby
 gem 'tater'
-#+end_src
+```
 
 And then execute:
 
-#+begin_src sh
+``` sh
 bundle
-#+end_src
+```
 
 Or install it yourself by running:
 
-#+begin_src sh
+``` sh
 gem install tater
-#+end_src
+```
 
-** Usage
+## Usage
 
-#+begin_src ruby
+``` ruby
 require 'tater'
 
 messages = {
@@ -57,56 +57,56 @@ i18n.translate('some.key') # => 'This here string!'
 
 # Interpolation:
 i18n.translate('interpolated', you: 'world') # => 'Hello world!'
-#+end_src
+```
 
-** Array localization
+## Array localization
 
 Given an array, Tater will do it's best to join the elements of the array into a
 sentence based on how many elements there are.
 
-#+begin_example
+``` example
 en:
   array:
     last_word_connector: ", and "
     two_words_connector: " and "
     words_connector: ", "
-#+end_example
+```
 
-#+begin_src ruby
+``` ruby
 i18n.localize(%w[tacos enchiladas burritos]) # => "tacos, enchiladas, and burritos"
-#+end_src
+```
 
-** Numeric localization
+## Numeric localization
 
-Numeric localization (=Numeric=, =Integer=, =Float=, and =BigDecimal=) require
+Numeric localization (`Numeric`, `Integer`, `Float`, and `BigDecimal`) require
 filling in a separator and delimiter. For example:
 
-#+begin_example
+``` example
 en:
   numeric:
     delimiter: ','
     separator: '.'
-#+end_example
+```
 
 With that, you can do things like this:
 
-#+begin_src ruby
+``` ruby
 i18n.localize(1000.2) # => "1,000.20"
-#+end_src
+```
 
 The separator and delimiter can also be passed in per-call:
 
-#+begin_src ruby
+``` ruby
 i18n.localize(1000.2, delimiter: '_', separator: '+') # => "1_000+20"
-#+end_src
+```
 
-** Date and time localization
+## Date and time localization
 
-Date and time localization (=Date=, =Time=, and =DateTime=) require filling in
-all of the needed names and abbreviations for days and months. Here's the
+Date and time localization (`Date`, `Time`, and `DateTime`) require filling
+in all of the needed names and abbreviations for days and months. Here's the
 example for French, which is used in the tests.
 
-#+begin_example
+``` example
 fr:
   time:
     am: 'am'
@@ -169,27 +169,27 @@ fr:
       - oct.
       - nov.
       - déc.
-#+end_example
+```
 
-The statically defined keys for dates are =days=, =abbreviated_days=, =months=,
-and =abbreviated_months=. Only =am= and =pm= are needed for times and only if
-you plan on using the =%p= or =%P= format strings.
+The statically defined keys for dates are `days`, `abbreviated_days`, `months`,
+and `abbreviated_months`. Only `am` and `pm` are needed for times and only if
+you plan on using the `%p` or `%P` format strings.
 
 With all of that, you can do something like:
 
-#+begin_src ruby
+``` ruby
 i18n.localize(Date.new(1970, 1, 1), format: '%A') # => 'jeudi'
 
 # Or, using a key defined in "formats":
 i18n.localize(Date.new(1970, 1, 1), format: 'day') # => 'jeudi'
-#+end_src
+```
 
-** Cascading lookups
+## Cascading lookups
 
 Lookups can be cascaded, i.e. pieces of the scope of the can be lopped off
 incrementally.
 
-#+begin_src ruby
+``` ruby
 messages = {
   'en' => {
     'login' => {
@@ -208,40 +208,40 @@ i18n.translate('login.special.title') # => 'Special Login'
 i18n.translate('login.special.description') # => 'Tater lookup failed'
 
 i18n.translate('login.special.description', cascade: true) # => 'Normal description.'
-#+end_src
+```
 
 With cascade, the final key stays the same, but pieces of the scope get lopped
 off. In this case, lookups will be tried in this order:
 
-1. =login.special.description=
-2. =login.description=
+1.  `login.special.description`
+2.  `login.description`
 
 This can be useful when you want to override some messages but don't want to
 have to copy all of the other, non-overwritten messages.
 
 Cascading can also be enabled by default when initializing an instance of Tater.
 
-#+begin_src ruby
+``` ruby
 Tater.new(cascade: true)
-#+end_src
+```
 
 Cascading is off by default.
 
-** Defaults
+## Defaults
 
 If you'd like to default to another value in case of a missed lookup, you can
-provide the =:default= option to =#translate=.
+provide the `:default` option to `#translate`.
 
-#+begin_src ruby
+``` ruby
 Tater.new.translate('nope', default: 'Yep!') # => 'Yep!'
-#+end_src
+```
 
-** Procs and messages in Ruby
+## Procs and messages in Ruby
 
 Ruby files can be used to store messages in addition to YAML, so long as the
-Ruby file returns a =Hash= when evaluated.
+Ruby file returns a `Hash` when evaluated.
 
-#+begin_src ruby
+``` ruby
 {
   'en' => {
     ruby: proc do |key, options = {}|
@@ -249,15 +249,15 @@ Ruby file returns a =Hash= when evaluated.
     end
   }
 }
-#+end_src
+```
 
-** Multiple locales
+## Multiple locales
 
 If you would like to check multiple locales and pull the first matching one out,
-you can pass the =:locales= option to initialization or the =translate= method
+you can pass the `:locales` option to initialization or the `translate` method
 with an array of top-level locale keys.
 
-#+begin_src ruby
+``` ruby
 messages = {
   'en' => {
     'title' => 'Login',
@@ -276,23 +276,25 @@ i18n.translate('description', locales: %w[fr en]) # => 'English description.'
 i18n = Tater.new(messages: messages, locales: %w[fr en])
 i18n.translate('title') # => 'la connexion'
 i18n.translate('description') # => 'English description.'
-#+end_src
+```
 
 Locales will be tried in order and whichever one matches first will be returned.
 
-** Limitations
+## Limitations
 
 - It is not plug-able, it does what it does and that's it.
 - It doesn't handle pluralization yet, though it may in the future.
 
-** Why?
+## Why?
 
-Because [[https://github.com/ruby-i18n/i18n][Ruby I18n]] is amazing and I wanted to try to create a minimum viable
-implementation of the bits of I18n that I use 90% of the time. Tater is a single
-file that handles the basics of lookup and interpolation.
+Because [Ruby I18n](https://github.com/ruby-i18n/i18n) is amazing and I wanted
+to try to create a minimum viable implementation of the bits of I18n that I
+use 90% of the time. Tater is a single file that handles the basics of lookup
+and interpolation.
 
-** Trivia
+## Trivia
 
-I was originally going to call this library "Translator" but with a [[https://en.wikipedia.org/wiki/Numeronym][numeronym]]
-like I18n: "t8r".  I looked at it for a while but I read it as "tater" instead
-of "tee-eight-arr" so I figured I'd just name it Tater. Tater the translator.
+I was originally going to call this library "Translator" but with a
+[numeronym](https://en.wikipedia.org/wiki/Numeronym) like I18n: "t8r". I looked
+at it for a while but I read it as "tater" instead of "tee-eight-arr" so I
+figured I'd just name it Tater. Tater the translator.
