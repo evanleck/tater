@@ -1,5 +1,10 @@
 # Tater Changelog
 
+## 3.0.6
+
+Refactor `#translate` and `#includes?`, adding a new private method
+`#lookup_with_options`.
+
 ## 3.0.5
 
 1. Modify some internals to allow freezing an instance of `Tater`. Note that

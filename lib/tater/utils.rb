@@ -52,7 +52,8 @@ class Tater
       end.freeze
     end
 
-    # Format values into a string if appropriate.
+    # Format values into a string, conditionally checking the string and options
+    # before interpolating.
     #
     # @param string [String]
     #   The target string to interpolate into.
@@ -64,6 +65,18 @@ class Tater
       return string if options.empty?
       return string unless interpolation_string?(string)
 
+      interpolate!(string, options)
+    end
+
+    # Format values into a string unconditionally.
+    #
+    # @param string [String]
+    #   The target string to interpolate into.
+    # @param options [Hash]
+    #   The values to interpolate into the target string.
+    #
+    # @return [String]
+    def self.interpolate!(string, options)
       format(string, options)
     end
 

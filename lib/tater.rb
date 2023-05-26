@@ -217,24 +217,9 @@ class Tater
   #
   # @return [Boolean]
   def includes?(key, options = HASH)
-    if options.empty?
-      !lookup(key).nil?
-    else
-      message =
-        if options.key?(:locales)
-          options[:locales].append(@locale) if @locale && !options[:locales].include?(@locale)
+    return !lookup(key).nil? if options.empty?
 
-          options[:locales].find do |accept|
-            found = lookup(key, locale: accept, cascade: options[:cascade])
-
-            break found unless found.nil?
-          end
-        else
-          lookup(key, locale: options[:locale], cascade: options[:cascade])
-        end
-
-      !message.nil?
-    end
+    !lookup_with_options(key, options).nil?
   end
 
   # Translate a key path and optional interpolation arguments into a string.
@@ -264,33 +249,22 @@ class Tater
   #   defined key.
   def translate(key, options = HASH)
     if options.empty?
-      message = lookup(key)
-
-      if message.is_a?(Proc) # rubocop:disable Style/CaseLikeIf
-        message.call(key)
-      elsif message.is_a?(String)
+      case (message = lookup(key))
+      when String
         message
+      when Proc
+        message.call(key)
       else
         "Tater lookup failed: #{ locale }.#{ key }"
       end
     else
-      message =
-        if options.key?(:locales)
-          options[:locales].append(@locale) if @locale && !options[:locales].include?(@locale)
+      case (message = lookup_with_options(key, options))
+      when String
+        return message unless Utils.interpolation_string?(message)
 
-          options[:locales].find do |accept|
-            found = lookup(key, locale: accept, cascade: options[:cascade])
-
-            break found unless found.nil?
-          end
-        else
-          lookup(key, locale: options[:locale], cascade: options[:cascade])
-        end
-
-      if message.is_a?(Proc) # rubocop:disable Style/CaseLikeIf
+        Utils.interpolate!(message, options.except(:cascade, :default, :locale, :locales))
+      when Proc
         message.call(key, options.except(:cascade, :default, :locale, :locales))
-      elsif message.is_a?(String)
-        Utils.interpolate(message, options.except(:cascade, :default, :locale, :locales))
       else
         options[:default] || "Tater lookup failed: #{ options[:locale] || options[:locales] || locale }.#{ key }"
       end
@@ -298,6 +272,28 @@ class Tater
   end
 
   private
+
+  # @param key [String]
+  #   The period-separated key path to look within our messages for.
+  # @param options [Hash]
+  #   Options, including values to interpolate to any found string.
+  #
+  # @return [String]
+  #   The translated and interpreted string, if found, or any data at the
+  #   defined key.
+  def lookup_with_options(key, options)
+    if (locs = options[:locales])
+      locs.append(@locale) if @locale && !locs.include?(@locale)
+
+      locs.find do |accept|
+        found = lookup(key, locale: accept, cascade: options[:cascade])
+
+        break found unless found.nil?
+      end
+    else
+      lookup(key, locale: options[:locale], cascade: options[:cascade])
+    end
+  end
 
   # Localize an Array object.
   #
