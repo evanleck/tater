@@ -404,11 +404,13 @@ describe Tater do
 
     it 'overrides the locale when available' do
       i18n.locale = 'delimiter_only'
+
       assert_equal 'delimiter_only', i18n.locale
     end
 
     it 'does not override the locale when not available' do
       i18n.locale = 'nopeskies'
+
       assert_equal 'en', i18n.locale
     end
   end
@@ -459,6 +461,7 @@ describe Tater do
   describe '#inspect' do
     it 'returns a stringified version of the object' do
       obj = Tater.new(path: File.expand_path('test/fixtures'), locale: 'en')
+
       assert_equal %(#<Tater:#{ obj.object_id } @cascade=#{ obj.cascades? } @locale="#{ obj.locale }" @available=#{ obj.available }>), obj.inspect
     end
   end
